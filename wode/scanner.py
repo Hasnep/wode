@@ -44,16 +44,8 @@ class Scanner:
     def is_at_end(self) -> bool:
         return self.current_position == len(self.source)
 
-    def chomp(self) -> str:
-        output = self.look_all()
-        self.starting_position = self.current_position
-        return output
-
     def advance(self, by: int = 1) -> None:
         self.current_position += by
-
-    def look_all(self) -> str:
-        return self.source[self.starting_position : (self.current_position + 1)]
 
     def look_one(self) -> str:
         return self.source[self.current_position]
@@ -62,27 +54,48 @@ class Scanner:
         return self.source[self.current_position + 1]
 
     def scan_for_end_of_file_token(self) -> Maybe[Token]:
-        if self.is_at_end():
-            return Just(Token(TokenType.EOF, ""))
-        else:
+        if not self.is_at_end():
             return nothing
+
+        return Just(Token(TokenType.EOF, ""))
 
     def scan_for_whitespace_token(self) -> Maybe[str]:
         first_character = self.get_remaining_source()[:1]
-        if first_character in [" ", "\t", "\n"]:
-            return Just(first_character)
-        else:
+        if first_character not in [" ", "\t", "\n"]:
             return nothing
 
+        return Just(first_character)
+
     def scan_for_comment_token(self) -> Maybe[Token]:
-        if self.look_one() == "#":
-            comment = ""
-            while not self.is_at_end() and self.look_one() != "\n":
-                comment += self.look_one()
-                self.advance()
-            return Just(Token(TokenType.COMMENT, comment))
-        else:
+        if self.look_one() != "#":
             return nothing
+
+        comment = ""
+        while not self.is_at_end() and self.look_one() != "\n":
+            comment += self.look_one()
+            self.advance()
+        return Just(Token(TokenType.COMMENT, comment))
+
+    def scan_for_string_token(self) -> Result[Maybe[Token], WodeError]:
+        if self.look_one() != '"':
+            return Ok(nothing)
+
+        n_quotation_marks_seen = 0
+        string = ""
+        while n_quotation_marks_seen < 2:
+            if self.is_at_end():
+                return Err(
+                    WodeError(
+                        WodeErrorType.UnexpectedEndOfFileError,
+                        self.source,
+                        self.current_position,
+                    )
+                )
+            if self.look_one() == '"':
+                n_quotation_marks_seen += 1
+            string += self.look_one()
+            self.advance()
+        return Ok(Just(Token(TokenType.STRING, string)))
 
     def scan_for_double_character_token(self) -> Maybe[Token]:
         lexeme = self.get_remaining_source()[:2]
@@ -116,6 +129,18 @@ class Scanner:
             case _:
                 pass
 
+        match self.scan_for_string_token():
+            case Ok(maybe_string_token):
+                match maybe_string_token:
+                    case Just(string_token):
+
+                        return Ok(Just(string_token))
+                    case _:
+                        pass
+            case err:
+                self.advance()
+                return err
+
         double_character_token = self.scan_for_double_character_token()
         match double_character_token:
             case Just(token):
@@ -143,8 +168,7 @@ class Scanner:
     def scan(self) -> Result[List[Token], List[WodeError]]:
         errors: List[WodeError] = []
         while True:
-            token_result = self.scan_once()
-            match token_result:
+            match self.scan_once():
                 case Ok(maybe_token):
                     match maybe_token:
                         case Just(token):

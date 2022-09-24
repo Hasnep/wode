@@ -1,5 +1,6 @@
-from .lines import get_line, get_line_number_of_position, get_position_in_line
 from enum import Enum
+
+from .lines import get_line, get_line_number_of_position, get_position_in_line
 
 
 class WodeErrorType(Enum):
@@ -16,4 +17,3 @@ class WodeError:
         self.message = "\n".join(
             [f"{error_type} on line {line_number}:", line, arrow_string]
         )
-        print(self.message)

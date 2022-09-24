@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 import pytest
-from koda import Ok
+from koda import Err, Ok
 
 from wode.scanner import Scanner
 from wode.token import Token
@@ -73,6 +73,15 @@ test_cases: List[Tuple[str, str, List[Token]]] = [
         ],
     ),
     ("just_a_string", '"A string"', [Token(TokenType.STRING, '"A string"')]),
+    (
+        "string_concatenation",
+        '"A string" + "Another string"',
+        [
+            Token(TokenType.STRING, '"A string"'),
+            Token(TokenType.PLUS, "+"),
+            Token(TokenType.STRING, '"Another string"'),
+        ],
+    ),
 ]
 
 
@@ -82,5 +91,13 @@ test_cases: List[Tuple[str, str, List[Token]]] = [
 def test_scanner_on_example_files(
     test_case_name: str, source: str, expected_tokens: List[Token]
 ):
-    tokens = Scanner(source).scan()
-    assert tokens == Ok([*expected_tokens, Token(TokenType.EOF, "")]), test_case_name
+    tokens_result = Scanner(source).scan()
+    match tokens_result:
+        case Ok(tokens):
+            assert tokens == [
+                *expected_tokens,
+                Token(TokenType.EOF, ""),
+            ], test_case_name
+        case Err(wode_errors):
+            for e in wode_errors:
+                raise Exception(e.message)
