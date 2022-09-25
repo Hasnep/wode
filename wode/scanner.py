@@ -133,7 +133,6 @@ class Scanner:
             case Ok(maybe_string_token):
                 match maybe_string_token:
                     case Just(string_token):
-
                         return Ok(Just(string_token))
                     case _:
                         pass
