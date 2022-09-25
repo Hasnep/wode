@@ -12,12 +12,12 @@ from wode.token import Token
 from wode.token_type import TokenType
 
 
-class TestCase(BaseModel):
+class AbstractTestCase(BaseModel):
     name: str
     source: str
 
 
-class SuccessCase(TestCase):
+class SuccessCase(AbstractTestCase):
     expected_tokens: List[Token]
 
     @validator("expected_tokens", each_item=True, pre=True)
@@ -25,7 +25,7 @@ class SuccessCase(TestCase):
         return Token(TokenType(x["token_type"]), x["lexeme"])
 
 
-class FailureCase(TestCase):
+class FailureCase(AbstractTestCase):
     expected_errors: List[WodeErrorType]
 
     @validator("expected_errors", each_item=True, pre=True)
