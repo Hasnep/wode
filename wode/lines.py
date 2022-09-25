@@ -1,4 +1,9 @@
 from itertools import accumulate
+from typing import List
+
+
+def get_lines(source: str) -> List[str]:
+    return source.splitlines(keepends=True)
 
 
 def get_line(source: str, line_number: int) -> str:
@@ -6,7 +11,8 @@ def get_line(source: str, line_number: int) -> str:
 
 
 def get_line_number_of_position(source: str, position: int) -> int:
-    line_lengths = (len(line) for line in source.splitlines())
+    lines = get_lines(source)
+    line_lengths = (len(line) for line in lines)
     line_boundaries = accumulate(line_lengths)
     for line_number, line_boundary in enumerate(line_boundaries, start=1):
         if line_boundary > position:
@@ -15,7 +21,8 @@ def get_line_number_of_position(source: str, position: int) -> int:
 
 
 def get_position_in_line(source: str, position: int) -> int:
-    line_lengths = (len(line) for line in source.splitlines())
+    lines = get_lines(source)
+    line_lengths = (len(line) for line in lines)
     line_boundaries = accumulate(line_lengths)
 
     previous_line_boundary = 0
