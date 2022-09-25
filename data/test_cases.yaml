@@ -112,6 +112,6 @@ unexpected_end_of_string_again:
   source: |
     "This is an
     un-terminated multiline-string
-    
+
   expected_errors:
     - unexpected_end_of_file_error
