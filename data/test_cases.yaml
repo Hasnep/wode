@@ -1,0 +1,117 @@
+null_case:
+  source: ""
+  expected_tokens: []
+
+# Operator
+
+just_a_plus:
+  source: |
+    +
+  expected_tokens:
+    - { token_type: plus, lexeme: + }
+
+two_plusses:
+  source: |
+    ++
+  expected_tokens:
+    - { token_type: plus, lexeme: + }
+    - { token_type: plus, lexeme: + }
+
+some_brackets:
+  source: |
+    ()
+  expected_tokens:
+    - { token_type: left_paren, lexeme: ( }
+    - { token_type: right_paren, lexeme: ) }
+
+brackets_inside_curly_bois:
+  source: |
+    {()}
+  expected_tokens:
+    - { token_type: left_brace, lexeme: "{" }
+    - { token_type: left_paren, lexeme: "(" }
+    - { token_type: right_paren, lexeme: ")" }
+    - { token_type: right_brace, lexeme: "}" }
+
+back_to_back_single_character_operators:
+  source: |
+    */
+  expected_tokens:
+    - { token_type: star, lexeme: "*" }
+    - { token_type: slash, lexeme: "/" }
+
+two_character_operator:
+  source: |
+    !=
+  expected_tokens:
+    - { token_type: bang_equal, lexeme: "!=" }
+
+possibly_ambiguous_operators:
+  source: |
+    !=!
+  expected_tokens:
+    - { token_type: bang_equal, lexeme: "!=" }
+    - { token_type: bang, lexeme: "!" }
+
+lots_of_operators:
+  source: |
+    !*+-/
+    =<><=>===!=
+  expected_tokens:
+    - { token_type: bang, lexeme: "!" }
+    - { token_type: star, lexeme: "*" }
+    - { token_type: plus, lexeme: "+" }
+    - { token_type: minus, lexeme: "-" }
+    - { token_type: slash, lexeme: "/" }
+    - { token_type: equal, lexeme: "=" }
+    - { token_type: less, lexeme: "<" }
+    - { token_type: greater, lexeme: ">" }
+    - { token_type: less_equal, lexeme: "<=" }
+    - { token_type: greater_equal, lexeme: ">=" }
+    - { token_type: equal_equal, lexeme: "==" }
+    - { token_type: bang_equal, lexeme: "!=" }
+
+# Comments
+
+just_a_comment:
+  source: |
+    # This is a comment
+  expected_tokens:
+    - { token_type: comment, lexeme: "# This is a comment" }
+
+multiple_comments:
+  source: |
+    # Comment spanning
+    # Multiple lines
+  expected_tokens:
+    - { token_type: comment, lexeme: "# Comment spanning" }
+    - { token_type: comment, lexeme: "# Multiple lines" }
+
+# Strings
+
+just_a_string:
+  source: '"A string"'
+  expected_tokens:
+    - { token_type: string, lexeme: '"A string"' }
+
+string_concatenation:
+  source: |
+    "A string" + "Another string"
+  expected_tokens:
+    - { token_type: string, lexeme: '"A string"' }
+    - { token_type: plus, lexeme: "+" }
+    - { token_type: string, lexeme: '"Another string"' }
+
+unexpected_end_of_string:
+  source: |
+    "This is an un-terminated string
+  expected_errors:
+    - unexpected_end_of_file_error
+
+unexpected_end_of_string_again:
+  source: |
+    "This is an
+    un-terminated multiline-string
+    
+  expected_errors:
+    - unexpected_end_of_file_error
