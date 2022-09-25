@@ -138,7 +138,6 @@ class Scanner:
                     case _:
                         pass
             case err:
-                self.advance()
                 return err
 
         double_character_token = self.scan_for_double_character_token()
