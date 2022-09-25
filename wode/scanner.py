@@ -88,7 +88,7 @@ class Scanner:
                     WodeError(
                         WodeErrorType.UnexpectedEndOfFileError,
                         self.source,
-                        self.current_position,
+                        self.current_position - 1,
                     )
                 )
             if self.look_one() == '"':
