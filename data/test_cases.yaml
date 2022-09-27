@@ -90,7 +90,8 @@ multiple_comments:
 # Strings
 
 just_a_string:
-  source: '"A string"'
+  source: |
+    "A string"
   expected_tokens:
     - { token_type: string, lexeme: '"A string"' }
 
