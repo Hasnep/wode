@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from .token_type import TokenType
+from wode.token_type import TokenType
 
 
 @dataclass

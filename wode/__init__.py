@@ -5,7 +5,7 @@ from typing import Optional
 
 from koda import Err, Ok
 
-from .scanner import Scanner
+from wode.scanner import Scanner
 
 
 def get_file_path() -> Optional[Path]:

@@ -1,6 +1,6 @@
 from enum import Enum
 
-from .lines import get_line, get_line_number_of_position, get_position_in_line
+from wode.lines import get_line, get_line_number_of_position, get_position_in_line
 
 
 class WodeErrorType(Enum):

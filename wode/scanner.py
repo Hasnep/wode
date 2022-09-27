@@ -2,9 +2,9 @@ from typing import List
 
 from koda import Err, Just, Maybe, Ok, Result, mapping_get, nothing
 
-from .errors import WodeError, WodeErrorType
-from .token import Token
-from .token_type import TokenType
+from wode.errors import WodeError, WodeErrorType
+from wode.token import Token
+from wode.token_type import TokenType
 
 double_character_token_mapping = {
     "!=": TokenType.BANG_EQUAL,
