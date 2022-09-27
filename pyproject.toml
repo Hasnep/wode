@@ -32,6 +32,9 @@ ignore = ["E501", "E203", "W503"]
 [tool.pytest.ini_options]
 timeout = 10
 
+[tool.pyright]
+strict = ["**/*"]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
