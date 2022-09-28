@@ -66,10 +66,9 @@ def test_scanner_parses_test_cases(success_case: SuccessCase):
     tokens_result = Scanner(source).scan()
     match tokens_result:
         case Ok(tokens):
-            assert tokens == [
-                *expected_tokens,
-                Token(TokenType.EOF, ""),
-            ], f"Test case `{test_case_name}` was not scanned correctly."
+            assert tokens == (
+                expected_tokens + [Token(TokenType.EOF, "")]
+            ), f"Test case `{test_case_name}` was not scanned correctly."
         case Err(wode_errors):
             for e in wode_errors:
                 raise Exception(e.message)
