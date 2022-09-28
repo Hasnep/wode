@@ -26,7 +26,8 @@ class TokenType(Enum):
     # Literals
     IDENTIFIER = "identifier"
     STRING = "string"
-    NUMBER = "number"
+    INTEGER = "integer"
+    FLOAT = "float"
     # Keywords
     AND = "and"
     CLASS = "class"

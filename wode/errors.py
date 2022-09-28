@@ -6,6 +6,8 @@ from wode.lines import get_line, get_line_number_of_position, get_position_in_li
 class WodeErrorType(Enum):
     UnexpectedEndOfFileError = "unexpected_end_of_file_error"
     UnknownCharacterError = "unknown_character_error"
+    UnterminatedFloatError = "unterminated_float_error"
+    NoLeadingZeroOnFloatError = "no_leading_zero_on_float_error"
 
 
 class WodeError:

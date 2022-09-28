@@ -116,3 +116,35 @@ unexpected_end_of_string_again:
 
   expected_errors:
     - unexpected_end_of_file_error
+
+# Numbers
+
+just_an_integer:
+  source: |
+    123
+  expected_tokens:
+    - { token_type: integer, lexeme: "123" }
+
+just_a_float:
+  source: |
+    123.456
+  expected_tokens:
+    - { token_type: float, lexeme: "123.456" }
+
+unterminated_float:
+  source: |
+    123.
+  expected_errors:
+    - unterminated_float_error
+
+too_many_decimal_points:
+  source: |
+    123.456.789
+  expected_errors:
+    - no_leading_zero_on_float_error
+
+no_leading_zero:
+  source: |
+    .456
+  expected_errors:
+    - no_leading_zero_on_float_error

@@ -50,8 +50,11 @@ class Scanner:
     def look_one(self) -> str:
         return self.source[self.current_position]
 
-    def look_ahead(self) -> str:
-        return self.source[self.current_position + 1]
+    def look_ahead(self) -> Maybe[str]:
+        try:
+            return Just(self.source[self.current_position + 1])
+        except IndexError:
+            return nothing
 
     def scan_for_end_of_file_token(self) -> Maybe[Token]:
         if not self.is_at_end():
@@ -109,6 +112,65 @@ class Scanner:
         maybe_token = maybe_token_type.map(lambda token_type: Token(token_type, lexeme))
         return maybe_token
 
+    def scan_for_number_token(self) -> Result[Maybe[Token], WodeError]:
+        def is_digit(c: str) -> bool:
+            return c in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+        c = self.look_one()
+        if not is_digit(c):
+            if c == ".":
+                self.advance()
+                return Err(
+                    WodeError(
+                        WodeErrorType.NoLeadingZeroOnFloatError,
+                        self.source,
+                        self.current_position,
+                    )
+                )
+            else:
+                return Ok(nothing)
+
+        number = ""
+        while True:
+            c = self.look_one()
+            if is_digit(c):
+                number += c
+                self.advance()
+            else:
+                if c == ".":
+                    maybe_next_c = self.look_ahead()
+                    match maybe_next_c:
+                        case Just(next_c):
+                            if is_digit(next_c):
+                                number += c
+                                self.advance()
+                                while True:
+                                    c = self.look_one()
+                                    if is_digit(c):
+                                        number += c
+                                        self.advance()
+                                    else:
+                                        return Ok(Just(Token(TokenType.FLOAT, number)))
+                            else:
+                                self.advance()
+                                return Err(
+                                    WodeError(
+                                        WodeErrorType.UnterminatedFloatError,
+                                        self.source,
+                                        self.current_position,
+                                    )
+                                )
+                        case _:
+                            return Err(
+                                WodeError(
+                                    WodeErrorType.UnexpectedEndOfFileError,
+                                    self.source,
+                                    self.current_position,
+                                )
+                            )
+                else:
+                    return Ok(Just(Token(TokenType.INTEGER, number)))
+
     def scan_once(self) -> Result[Maybe[Token], WodeError]:
         match self.scan_for_end_of_file_token():
             case Just(end_of_file_token):
@@ -134,6 +196,16 @@ class Scanner:
                 match maybe_string_token:
                     case Just(string_token):
                         return Ok(Just(string_token))
+                    case _:
+                        pass
+            case err:
+                return err
+
+        match self.scan_for_number_token():
+            case Ok(maybe_number_token):
+                match maybe_number_token:
+                    case Just(number_token):
+                        return Ok(Just(number_token))
                     case _:
                         pass
             case err:
