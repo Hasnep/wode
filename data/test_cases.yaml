@@ -148,3 +148,35 @@ no_leading_zero:
     .456
   expected_errors:
     - no_leading_zero_on_float_error
+
+# Identifier
+
+an_identifier:
+  source: |
+    foo
+  expected_tokens:
+    - { token_type: identifier, lexeme: foo }
+
+multiple_identifiers:
+  source: |
+    foo + bar
+  expected_tokens:
+    - { token_type: identifier, lexeme: foo }
+    - { token_type: plus, lexeme: + }
+    - { token_type: identifier, lexeme: bar }
+
+a_keyword:
+  source: |
+    true
+  expected_tokens:
+    - { token_type: "true", lexeme: "true" }
+
+multiple_keywords:
+  source: |
+    true and false or true
+  expected_tokens:
+    - { token_type: "true", lexeme: "true" }
+    - { token_type: and, lexeme: and }
+    - { token_type: "false", lexeme: "false" }
+    - { token_type: or, lexeme: or }
+    - { token_type: "true", lexeme: "true" }

@@ -2,6 +2,7 @@ from typing import List
 
 from koda import Err, Just, Maybe, Ok, Result, mapping_get, nothing
 
+from wode.constants import DIGITS, LETTERS
 from wode.errors import WodeError, WodeErrorType
 from wode.token import Token
 from wode.token_type import TokenType
@@ -29,6 +30,20 @@ single_character_token_mapping = {
     "=": TokenType.EQUAL,
     ">": TokenType.GREATER,
     "<": TokenType.LESS,
+}
+reserved_keywords = {
+    "and": TokenType.AND,
+    "else": TokenType.ELSE,
+    "false": TokenType.FALSE,
+    "for": TokenType.FOR,
+    "if": TokenType.IF,
+    "let": TokenType.LET,
+    "nothing": TokenType.NOTHING,
+    "or": TokenType.OR,
+    "return": TokenType.RETURN,
+    "struct": TokenType.STRUCT,
+    "true": TokenType.TRUE,
+    "while": TokenType.WHILE,
 }
 
 
@@ -114,7 +129,7 @@ class Scanner:
 
     def scan_for_number_token(self) -> Result[Maybe[Token], WodeError]:
         def is_digit(c: str) -> bool:
-            return c in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+            return c in DIGITS
 
         c = self.look_one()
         if not is_digit(c):
@@ -171,6 +186,28 @@ class Scanner:
                 else:
                     return Ok(Just(Token(TokenType.INTEGER, number)))
 
+    def scan_for_identifier_token(self) -> Maybe[Token]:
+        valid_identifier_prefixes = ["_"] + LETTERS
+        valid_identifier_characters = ["_"] + LETTERS + DIGITS
+        c = self.look_one()
+        if c not in valid_identifier_prefixes:
+            return nothing
+
+        identifier = ""
+
+        while True:
+            c = self.look_one()
+            if c in valid_identifier_characters:
+                identifier += c
+                self.advance()
+            else:
+                break
+
+        if identifier in reserved_keywords.keys():
+            return Just(Token(TokenType(reserved_keywords[identifier]), identifier))
+        else:
+            return Just(Token(TokenType.IDENTIFIER, identifier))
+
     def scan_once(self) -> Result[Maybe[Token], WodeError]:
         match self.scan_for_end_of_file_token():
             case Just(end_of_file_token):
@@ -211,19 +248,27 @@ class Scanner:
             case err:
                 return err
 
-        double_character_token = self.scan_for_double_character_token()
-        match double_character_token:
-            case Just(token):
+        maybe_double_character_token = self.scan_for_double_character_token()
+        match maybe_double_character_token:
+            case Just(double_character_token):
                 self.advance(2)
-                return Ok(Just(token))
+                return Ok(Just(double_character_token))
             case _:
                 pass
 
-        single_character_token = self.scan_for_single_character_token()
-        match single_character_token:
-            case Just(token):
+        maybe_single_character_token = self.scan_for_single_character_token()
+        match maybe_single_character_token:
+            case Just(single_character_token):
                 self.advance()
-                return Ok(Just(token))
+                return Ok(Just(single_character_token))
+            case _:
+                pass
+
+        maybe_identifier_token = self.scan_for_identifier_token()
+        match maybe_identifier_token:
+            case Just(identifier_token):
+                self.advance()
+                return Ok(Just(identifier_token))
             case _:
                 pass
 
