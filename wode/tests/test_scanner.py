@@ -2,15 +2,18 @@ import pytest
 from koda import Err, Ok
 
 from wode.scanner import Scanner
-from wode.tests.conftest import FailureCase, SuccessCase, failure_cases, success_cases
+from wode.tests.conftest import WodeTestCase, test_cases
 from wode.token import Token
 from wode.token_type import TokenType
+
+success_cases = [x for x in test_cases if len(x.expected_errors) == 0]
+failure_cases = [x for x in test_cases if len(x.expected_errors) > 0]
 
 
 @pytest.mark.parametrize(
     "success_case", success_cases, ids=[x.name for x in success_cases]
 )
-def test_scanner_parses_test_cases(success_case: SuccessCase):
+def test_scanner_parses_test_cases(success_case: WodeTestCase):
     test_case_name = success_case.name
     source = success_case.source
     expected_tokens = success_case.expected_tokens
@@ -29,7 +32,7 @@ def test_scanner_parses_test_cases(success_case: SuccessCase):
 @pytest.mark.parametrize(
     "failure_case", failure_cases, ids=[x.name for x in failure_cases]
 )
-def test_scanner_fails_on_failure_cases(failure_case: FailureCase):
+def test_scanner_fails_on_failure_cases(failure_case: WodeTestCase):
     test_case_name = failure_case.name
     source = failure_case.source
     expected_error_types = failure_case.expected_errors

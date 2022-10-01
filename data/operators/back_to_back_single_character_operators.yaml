@@ -1,0 +1,6 @@
+source: |
+  */
+expected_tokens:
+  - { token_type: star, lexeme: "*" }
+  - { token_type: slash, lexeme: "/" }
+expected_ast: null

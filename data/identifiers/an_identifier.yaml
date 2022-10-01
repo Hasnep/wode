@@ -1,0 +1,5 @@
+source: |
+  foo
+expected_tokens:
+  - { token_type: identifier, lexeme: foo }
+expected_ast: null

@@ -1,0 +1,4 @@
+source: |
+  123
+expected_tokens:
+  - { token_type: integer, lexeme: "123" }

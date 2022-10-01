@@ -1,0 +1,6 @@
+source: |
+  ++
+expected_tokens:
+  - { token_type: plus, lexeme: + }
+  - { token_type: plus, lexeme: + }
+expected_ast: null
