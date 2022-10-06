@@ -1,0 +1,7 @@
+source: |
+  12.34 + 56.78
+expected_tokens:
+  - { token_type: float, lexeme: "12.34" }
+  - { token_type: plus, lexeme: "+" }
+  - { token_type: float, lexeme: "56.78" }
+expected_ast: (+ 12.34 56.78)

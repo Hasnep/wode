@@ -30,7 +30,7 @@ pyright:
     poetry run python -m pyright wode
 
 pytest:
-    poetry run python -m pytest wode
+    poetry run python -m pytest -s wode
 
 example:
     poetry run python -m wode ./example.wode

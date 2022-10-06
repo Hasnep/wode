@@ -10,6 +10,8 @@ from wode.token_type import TokenType
 
 DATA_FOLDER = Path(".") / "data"
 
+test_cases_to_do = ["just_a_float", "adding_two_floats"]
+
 
 class WodeTestCase(BaseModel):
     name: str
@@ -37,7 +39,9 @@ def get_test_cases() -> List[WodeTestCase]:
 
     yaml = Yaml()  # type: ignore
     test_case_file_paths = DATA_FOLDER.glob("**/*.yaml")
-    return [_read_test_case(p) for p in test_case_file_paths]
+    return [
+        _read_test_case(p) for p in test_case_file_paths if p.stem in test_cases_to_do
+    ]
 
 
 test_cases = get_test_cases()

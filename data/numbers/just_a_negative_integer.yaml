@@ -1,0 +1,7 @@
+source: |
+  -123
+expected_tokens:
+  - { token_type: minus, lexeme: "-" }
+  - { token_type: integer, lexeme: "123" }
+expected_ast: |
+  (- 123)

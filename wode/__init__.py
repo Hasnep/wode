@@ -5,6 +5,8 @@ from typing import Optional
 
 from koda import Err, Ok
 
+from wode.ast_printer import AstPrinter
+from wode.parser import Parser
 from wode.scanner import Scanner
 
 
@@ -32,8 +34,21 @@ def main():
     tokens_result = Scanner(source).scan()
     match tokens_result:
         case Ok(tokens):
-            for token in tokens:
-                print(token)
+            parser = Parser(tokens)
+            expressions = parser.parse()
+            ast_printer = AstPrinter()
+            for expression in expressions:
+                rendered_expression = ast_printer.convert_to_s_expression(expression)
+                print(rendered_expression)
+                # match convert_ast(expression):
+                #     case Ok(converted_expression):
+                #         match unparse_go_expression(converted_expression):
+                #             case Ok(unparsed_go_expression):
+                #                 print(f"{unparsed_go_expression=}")
+                #             case Err(message):
+                #                 print(message)
+                #     case Err(message):
+                #         print(message)
         case Err(errors):
             for error in errors:
                 print(error.message)
