@@ -2,7 +2,7 @@ from typing import List
 
 from koda import Err, Ok, Result
 
-from wode.parser import BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr
+from wode.ast import BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr
 from wode.token_type import TokenType
 from wode.utils import combine_errs, get_errs, get_oks
 

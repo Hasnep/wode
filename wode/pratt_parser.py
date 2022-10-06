@@ -21,17 +21,26 @@ class Parser:
 
     def peek(self) -> Token:
         print("peeking")
-        return self.tokens[self.current_position]
+        try:
+            return self.tokens[self.current_position]
+        except IndexError:
+            return Token(TokenType.EOF, "")
 
-    def look_ahead(self) -> Token:
-        return self.tokens[self.current_position + 1]
+    # def look_ahead(self) -> Token:
+    #     return self.tokens[self.current_position + 1]
 
-    def advance(self) -> None:
+    def advance(self) -> Token:
+        token = self.peek()
         self.current_position += 1
         print(f"advancing to {self.current_position}")
+        return token
+
+    def expr(self) -> Expr:
+        return self.expr_binding_power(0)
 
     def expr_binding_power(self, minimum_binding_power: float) -> Expr:
-        token = self.peek()
+        print(f"another call with bp {minimum_binding_power}")
+        token = self.advance()
         print(token)
         match token.token_type:
             case TokenType.INTEGER | TokenType.FLOAT:
@@ -40,7 +49,6 @@ class Parser:
                 raise ValueError(f"Unknown token type `{token.token_type}`.")
 
         while True:
-            self.advance()
             token = self.peek()
             print(token)
             match token.token_type:
@@ -57,10 +65,11 @@ class Parser:
             if binding_power_left < minimum_binding_power:
                 break
 
-            self.advance()
+            self.advance()  # We peeked at the operator, now we consume it
             rhs = self.expr_binding_power(binding_power_right)
             lhs = BinaryExpr(lhs, operator, rhs)
 
+        print(f"returning {lhs}")
         return lhs
 
     def get_infix_binding_power(self, operator: TokenType) -> Tuple[float, float]:
