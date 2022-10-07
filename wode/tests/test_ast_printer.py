@@ -1,8 +1,8 @@
 import pytest
 from koda import Ok
 
+from wode.ast import BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr
 from wode.ast_printer import AstPrinter
-from wode.parser import BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr
 from wode.token import Token
 from wode.token_type import TokenType
 
