@@ -223,8 +223,10 @@ class Scanner:
                 pass
 
         match self.scan_for_comment_token():
-            case Just(comment_token):
-                return Ok(Just(comment_token))
+            case Just(_):
+                # TODO: Add parsing for comments
+                # return Ok(Just(comment_token))
+                return Ok(nothing)
             case _:
                 pass
 

@@ -1,4 +1,4 @@
 source: |
   # This is a comment
-expected_tokens:
-  - { token_type: comment, lexeme: "# This is a comment" }
+expected_tokens: []
+expected_ast: ""

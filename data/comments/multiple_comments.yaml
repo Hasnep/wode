@@ -1,7 +1,5 @@
 source: |
   # Comment spanning
   # Multiple lines
-expected_tokens:
-  - { token_type: comment, lexeme: "# Comment spanning" }
-  - { token_type: comment, lexeme: "# Multiple lines" }
-expected_ast: null
+expected_tokens: []
+expected_ast: ""
