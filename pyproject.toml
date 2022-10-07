@@ -28,7 +28,7 @@ ssort = "^0.11.6"
 profile = "black"
 
 [tool.flake8]
-ignore = ["E501", "E203", "W503"]
+ignore = ["E501", "E203", "W503", "F401"]
 
 [tool.pytest.ini_options]
 timeout = 10
