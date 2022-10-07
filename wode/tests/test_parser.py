@@ -20,8 +20,8 @@ def test_parser(success_case: WodeTestCase):
             parser = Parser(tokens)
             expression = parser.expr_binding_power(0)
             assert (
-                AstPrinter().convert_to_s_expression(expression).val
-                == success_case.expected_ast.strip()
+                AstPrinter().convert_to_s_expression(expression)
+                == success_case.expected_ast.strip()  # type: ignore
             )
         case Err(wode_errors):
             raise Exception(wode_errors)

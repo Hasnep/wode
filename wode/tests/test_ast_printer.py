@@ -1,5 +1,4 @@
 import pytest
-from koda import Ok
 
 from wode.ast import BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr
 from wode.ast_printer import AstPrinter
@@ -40,6 +39,6 @@ def test_ast_printer_prints_expressions_correctly(
     expression: Expr, expected_rendered_expression: str
 ):
     ast_printer = AstPrinter()
-    assert ast_printer.convert_to_s_expression(expression) == Ok(
-        expected_rendered_expression
+    assert (
+        ast_printer.convert_to_s_expression(expression) == expected_rendered_expression
     )

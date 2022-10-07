@@ -1,10 +1,6 @@
 from dataclasses import dataclass
-from typing import List
-
-from koda import Err, Ok, Result
 
 from wode.token import Token
-from wode.token_type import TokenType
 
 
 @dataclass
@@ -37,4 +33,9 @@ class GroupingExpr(Expr):
 
 @dataclass
 class VariableExpr(Expr):
+    token: Token
+
+
+@dataclass
+class CommentExpr(Expr):
     token: Token
