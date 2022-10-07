@@ -24,6 +24,9 @@ pytest-timeout = "^2.1.0"
 "ruamel.yaml" = "^0.17.21"
 ssort = "^0.11.6"
 
+[tool.poetry.scripts]
+wode = "wode:main"
+
 [tool.isort]
 profile = "black"
 
