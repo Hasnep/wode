@@ -5,6 +5,8 @@ from typing import Optional
 
 from koda import Err, Ok
 
+from wode.ast_printer import AstPrinter
+from wode.parser import Parser
 from wode.scanner import Scanner
 
 
@@ -32,8 +34,9 @@ def main():
     tokens_result = Scanner(source).scan()
     match tokens_result:
         case Ok(tokens):
-            for token in tokens:
-                print(token)
+            expression = Parser(tokens).expr()
+            rendered_expression = AstPrinter().convert_to_s_expression(expression)
+            print(rendered_expression)
         case Err(errors):
             for error in errors:
                 print(error.message)
