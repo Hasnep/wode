@@ -2,4 +2,4 @@ source: |
   # Comment spanning
   # Multiple lines
 expected_tokens: []
-expected_ast: null # TODO: Allow parsing empty progams
+expected_ast: null # TODO: Allow parsing empty programs
