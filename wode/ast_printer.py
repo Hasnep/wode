@@ -19,12 +19,13 @@ class AstPrinter:
                         return "nothing"
                     case TokenType.INTEGER | TokenType.FLOAT:
                         value = expr.literal.lexeme
-                        if value is None:
-                            raise ValueError(
-                                f"Unknown value for token type `{expr.literal.token_type}`."
-                            )
-                        else:
-                            return value
+                        return value
+                    case TokenType.STRING:
+                        value = expr.literal.lexeme
+                        return value
+                    case TokenType.IDENTIFIER:
+                        value = expr.literal.lexeme
+                        return value
                     case _:
                         raise ValueError(
                             f"Unknown token type `{expr.literal.token_type}`."
