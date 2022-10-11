@@ -10,7 +10,7 @@ repos:
         id: end-of-file-fixer
       - name: Remove trailing whitespace
         id: trailing-whitespace
-      - name: Check for files that would have a conflict on case-insensitive filesystem
+      - name: Check for files that would conflict on case-insensitive filesystem
         id: check-case-conflict
       - name: Check for merge conflicts
         id: check-merge-conflict
