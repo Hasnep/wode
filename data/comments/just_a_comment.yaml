@@ -1,4 +1,4 @@
 source: |
   # This is a comment
 expected_tokens: []
-expected_ast: ""
+expected_ast: null # TODO: Allow parsing empty progams
