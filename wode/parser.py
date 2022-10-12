@@ -45,7 +45,7 @@ class Parser:
             match token.token_type:
                 case TokenType.EOF:
                     break
-                case TokenType.PLUS | TokenType.MINUS | TokenType.STAR | TokenType.SLASH:
+                case TokenType.PLUS | TokenType.MINUS | TokenType.STAR | TokenType.SLASH | TokenType.AND | TokenType.OR:
                     operator = token
                 case _:
                     raise ValueError(f"Unknown token type `{token.token_type}`.")
@@ -71,10 +71,14 @@ class Parser:
         self, operator: TokenType
     ) -> Maybe[Tuple[float, float]]:
         match operator:
-            case TokenType.PLUS | TokenType.MINUS:
-                return Just((1, 1.1))
             case TokenType.STAR | TokenType.SLASH:
-                return Just((3, 3.1))
+                return Just((8, 8.1))
+            case TokenType.PLUS | TokenType.MINUS:
+                return Just((7, 7.1))
+            case TokenType.AND:
+                return Just((6.1, 6))
+            case TokenType.OR:
+                return Just((5.1, 5))
             case _:
                 return nothing
 

@@ -6,4 +6,4 @@ expected_tokens:
   - { token_type: "false", lexeme: "false" }
   - { token_type: or, lexeme: or }
   - { token_type: "true", lexeme: "true" }
-expected_ast: null
+expected_ast: (or (and true false) true)
