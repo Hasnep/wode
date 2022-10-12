@@ -29,7 +29,7 @@ class Parser:
     def expr_binding_power(self, minimum_binding_power: float) -> Expr:
         token = self.advance()
         match token.token_type:
-            case TokenType.INTEGER | TokenType.FLOAT | TokenType.STRING | TokenType.IDENTIFIER | TokenType.TRUE | TokenType.FALSE:
+            case TokenType.INTEGER | TokenType.FLOAT | TokenType.STRING | TokenType.IDENTIFIER | TokenType.TRUE | TokenType.FALSE | TokenType.NOTHING:
                 lhs = LiteralExpr(token)
             case TokenType.PLUS | TokenType.MINUS:
                 binding_power_left, binding_power_right = self.get_prefix_binding_power(
@@ -85,7 +85,9 @@ class Parser:
     def get_prefix_binding_power(self, operator: TokenType) -> Tuple[None, float]:
         match operator:
             case TokenType.PLUS | TokenType.MINUS:
-                return (None, 5)
+                return (None, 7.1)
+            case TokenType.BANG:
+                return (None, 5.1)
             case _:
                 raise ValueError(
                     f"Unknown binding power for prefix operator `{operator}`."
