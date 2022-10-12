@@ -1,6 +1,6 @@
 source: |
   ()
 expected_tokens:
-  - { token_type: left_paren, lexeme: ( }
-  - { token_type: right_paren, lexeme: ) }
+  - { token_type: left_bracket, lexeme: ( }
+  - { token_type: right_bracket, lexeme: ) }
 expected_ast: null

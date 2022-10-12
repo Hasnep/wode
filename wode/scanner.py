@@ -14,12 +14,12 @@ double_character_token_mapping = {
     "<=": TokenType.LESS_EQUAL,
 }
 single_character_token_mapping = {
-    "(": TokenType.LEFT_PAREN,
-    ")": TokenType.RIGHT_PAREN,
-    "{": TokenType.LEFT_BRACE,
-    "}": TokenType.RIGHT_BRACE,
-    "[": TokenType.LEFT_BRACKET,
-    "]": TokenType.RIGHT_BRACKET,
+    "(": TokenType.LEFT_BRACKET,
+    ")": TokenType.RIGHT_BRACKET,
+    "{": TokenType.LEFT_CURLY_BRACKET,
+    "}": TokenType.RIGHT_CURLY_BRACKET,
+    "[": TokenType.LEFT_SQUARE_BRACKET,
+    "]": TokenType.RIGHT_SQUARE_BRACKET,
     ",": TokenType.COMMA,
     ".": TokenType.DOT,
     "-": TokenType.MINUS,

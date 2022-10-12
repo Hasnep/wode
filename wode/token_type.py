@@ -3,12 +3,12 @@ from enum import Enum
 
 class TokenType(Enum):
     #  Single-character tokens
-    LEFT_PAREN = "left_paren"
-    RIGHT_PAREN = "right_paren"
-    LEFT_BRACE = "left_brace"
-    RIGHT_BRACE = "right_brace"
     LEFT_BRACKET = "left_bracket"
     RIGHT_BRACKET = "right_bracket"
+    LEFT_CURLY_BRACKET = "left_curly_bracket"
+    RIGHT_CURLY_BRACKET = "right_curly_bracket"
+    LEFT_SQUARE_BRACKET = "left_square_bracket"
+    RIGHT_SQUARE_BRACKET = "right_square_bracket"
     COMMA = "comma"
     DOT = "dot"
     MINUS = "minus"
