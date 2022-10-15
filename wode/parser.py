@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 from koda import Just, Maybe, nothing
 
-from wode.ast import BinaryExpr, Expr, LiteralExpr, UnaryExpr
+from wode.ast import BinaryExpression, Expression, LiteralExpression, UnaryExpression
 from wode.token import Token
 from wode.token_type import TokenType
 
@@ -23,20 +23,20 @@ class Parser:
         self.current_position += 1
         return token
 
-    def expr(self) -> Expr:
-        return self.expr_binding_power(0)
+    def parse_all(self) -> Expression:
+        return self.parse_expression(minimum_binding_power=0)
 
-    def expr_binding_power(self, minimum_binding_power: float) -> Expr:
+    def parse_expression(self, minimum_binding_power: float) -> Expression:
         token = self.advance()
         match token.token_type:
             case TokenType.INTEGER | TokenType.FLOAT | TokenType.STRING | TokenType.IDENTIFIER | TokenType.TRUE | TokenType.FALSE | TokenType.NOTHING:
-                lhs = LiteralExpr(token)
+                lhs = LiteralExpression(token)
             case TokenType.PLUS | TokenType.MINUS:
                 binding_power_left, binding_power_right = self.get_prefix_binding_power(
                     token.token_type
                 )
-                rhs = self.expr_binding_power(binding_power_right)
-                lhs = UnaryExpr(token, rhs)
+                rhs = self.parse_expression(binding_power_right)
+                lhs = UnaryExpression(token, rhs)
             case _:
                 raise ValueError(f"Unknown token type `{token.token_type}`.")
 
@@ -59,8 +59,8 @@ class Parser:
                         break
 
                     self.advance()  # We peeked at the operator, now we consume it
-                    rhs = self.expr_binding_power(binding_power_right)
-                    lhs = BinaryExpr(lhs, operator, rhs)
+                    rhs = self.parse_expression(binding_power_right)
+                    lhs = BinaryExpression(lhs, operator, rhs)
                     continue
                 case _:
                     break

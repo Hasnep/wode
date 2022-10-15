@@ -4,38 +4,38 @@ from wode.token import Token
 
 
 @dataclass
-class Expr:
+class Expression:
     pass
 
 
 @dataclass
-class UnaryExpr(Expr):
+class UnaryExpression(Expression):
     operator: Token
-    right: Expr
+    right: Expression
 
 
 @dataclass
-class BinaryExpr(Expr):
-    left: Expr
+class BinaryExpression(Expression):
+    left: Expression
     operator: Token
-    right: Expr
+    right: Expression
 
 
 @dataclass
-class LiteralExpr(Expr):
+class LiteralExpression(Expression):
     literal: Token
 
 
 @dataclass
-class GroupingExpr(Expr):
-    expression: Expr
+class GroupingExpression(Expression):
+    expression: Expression
 
 
 @dataclass
-class VariableExpr(Expr):
+class VariableExpression(Expression):
     token: Token
 
 
 @dataclass
-class CommentExpr(Expr):
+class CommentExpression(Expression):
     token: Token

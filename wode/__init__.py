@@ -34,7 +34,7 @@ def main():
     tokens_result = Scanner(source).scan()
     match tokens_result:
         case Ok(tokens):
-            expression = Parser(tokens).expr()
+            expression = Parser(tokens).parse_all()
             rendered_expression = AstPrinter().convert_to_s_expression(expression)
             print(rendered_expression)
         case Err(errors):

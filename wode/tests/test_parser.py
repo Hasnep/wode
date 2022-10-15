@@ -17,7 +17,7 @@ def test_parser(success_case: WodeTestCase):
     scanner = Scanner(success_case.source)
     match scanner.scan():
         case Ok(tokens):
-            expression = Parser(tokens).expr()
+            expression = Parser(tokens).parse_all()
             expected_ast = success_case.expected_ast
             if expected_ast is not None:
                 assert (
