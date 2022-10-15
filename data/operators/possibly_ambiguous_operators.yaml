@@ -3,3 +3,4 @@ source: |
 expected_tokens:
   - { token_type: bang_equal, lexeme: "!=" }
   - { token_type: bang, lexeme: "!" }
+expected_ast: null
