@@ -1,9 +1,8 @@
 # comment
 # another comment
-()
-{}+-*/!=>=<===
-"a string"
-123 # an integer
-123.456 # a float
-foo # a variable
-true # a keyword
+"a string";
+123; # an integer
+123.456; # a float
+foo; # a variable
+nothing; # a keyword
+true and false or true; # boolean operators

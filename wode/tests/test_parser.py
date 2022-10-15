@@ -17,12 +17,15 @@ def test_parser(success_case: WodeTestCase):
     scanner = Scanner(success_case.source)
     match scanner.scan():
         case Ok(tokens):
-            expression = Parser(tokens).parse_all()
+            expressions, errors = Parser(tokens).parse_all()
+            if len(errors) > 0:
+                error_messages = "\n".join(errors)
+                raise Exception(f"Parsing errors found:\n{error_messages}")
+
             expected_ast = success_case.expected_ast
             if expected_ast is not None:
-                assert (
-                    AstPrinter().convert_to_s_expression(expression)
-                    == expected_ast.strip()
-                )
+                assert [
+                    AstPrinter().convert_to_s_expression(e) for e in expressions
+                ] == [sexpr.strip() for sexpr in expected_ast]
         case Err(wode_errors):
             raise Exception(wode_errors)

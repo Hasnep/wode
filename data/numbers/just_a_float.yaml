@@ -2,5 +2,5 @@ source: |
   123.456
 expected_tokens:
   - { token_type: float, lexeme: "123.456" }
-expected_ast: |
-  123.456
+expected_ast:
+  - "123.456"

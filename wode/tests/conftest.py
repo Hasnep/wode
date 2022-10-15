@@ -16,7 +16,7 @@ class WodeTestCase(BaseModel):
     source: str
     expected_tokens: List[Token] = []
     expected_errors: List[WodeErrorType] = []
-    expected_ast: Optional[str] = None
+    expected_ast: Optional[List[str]]
 
     @validator("expected_tokens", pre=True, each_item=True)
     def parse_expected_tokens(cls, x: Dict[str, str]) -> Token:

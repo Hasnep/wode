@@ -2,4 +2,5 @@ source: |
   nothing
 expected_tokens:
   - { token_type: nothing, lexeme: nothing }
-expected_ast: nothing
+expected_ast:
+  - nothing

@@ -2,5 +2,5 @@ source: |
   true
 expected_tokens:
   - { token_type: "true", lexeme: "true" }
-expected_ast: |
-  true
+expected_ast:
+  - "true"
