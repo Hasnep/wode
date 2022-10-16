@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import Optional
 
-from wode.ast_printer import AstPrinter
+from wode.ast_printer import convert_to_s_expression
 from wode.parser import Parser
 from wode.scanner import Scanner
 
@@ -41,5 +41,5 @@ def main():
                 print(error.get_message())
         print("Parsed AST:")
         for expression in expressions:
-            rendered_expression = AstPrinter().convert_to_s_expression(expression)
+            rendered_expression = convert_to_s_expression(expression)
             print(rendered_expression)

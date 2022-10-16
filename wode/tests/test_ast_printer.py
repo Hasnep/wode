@@ -7,7 +7,7 @@ from wode.ast import (
     LiteralExpression,
     UnaryExpression,
 )
-from wode.ast_printer import AstPrinter
+from wode.ast_printer import convert_to_s_expression
 from wode.token import Token
 from wode.token_type import TokenType
 
@@ -48,6 +48,4 @@ from wode.token_type import TokenType
 def test_ast_printer_prints_expressions_correctly(
     expression: Expression, expected_rendered_expression: str
 ):
-    assert (
-        AstPrinter().convert_to_s_expression(expression) == expected_rendered_expression
-    )
+    assert convert_to_s_expression(expression) == expected_rendered_expression
