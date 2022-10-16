@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from koda import Err, Just, Maybe, Ok, Result, nothing
+from koda import Err, Just, Maybe, Ok, Result, mapping_get
 
 from wode.ast import BinaryExpression, Expression, LiteralExpression, UnaryExpression
 from wode.errors import WodeError, WodeErrorType
@@ -139,17 +139,15 @@ class Parser:
     def get_infix_binding_power(
         self, operator: TokenType
     ) -> Maybe[Tuple[float, float]]:
-        match operator:
-            case TokenType.STAR | TokenType.SLASH:
-                return Just((8, 8.1))
-            case TokenType.PLUS | TokenType.MINUS:
-                return Just((7, 7.1))
-            case TokenType.AND:
-                return Just((6.1, 6))
-            case TokenType.OR:
-                return Just((5.1, 5))
-            case _:
-                return nothing
+        operator_binding_power_mapping = {
+            TokenType.STAR: (8, 8.1),
+            TokenType.SLASH: (8, 8.1),
+            TokenType.PLUS: (7, 7.1),
+            TokenType.MINUS: (7, 7.1),
+            TokenType.AND: (6.1, 6),
+            TokenType.OR: (5.1, 5),
+        }
+        return mapping_get(operator_binding_power_mapping, operator)
 
     def get_prefix_binding_power(self, operator: TokenType) -> Tuple[None, float]:
         match operator:
