@@ -45,7 +45,15 @@ class Parser:
     ) -> Result[Expression, WodeError]:
         token = self.advance()
         match token.token_type:
-            case TokenType.INTEGER | TokenType.FLOAT | TokenType.STRING | TokenType.IDENTIFIER | TokenType.TRUE | TokenType.FALSE | TokenType.NOTHING:
+            case (
+                TokenType.INTEGER
+                | TokenType.FLOAT
+                | TokenType.STRING
+                | TokenType.IDENTIFIER
+                | TokenType.TRUE
+                | TokenType.FALSE
+                | TokenType.NOTHING
+            ):
                 lhs = LiteralExpression(token)
             case TokenType.PLUS | TokenType.MINUS:
                 binding_power_left, binding_power_right = self.get_prefix_binding_power(
@@ -84,7 +92,14 @@ class Parser:
                     self.advance()
                     # Finish parsing this expression
                     break
-                case TokenType.PLUS | TokenType.MINUS | TokenType.STAR | TokenType.SLASH | TokenType.AND | TokenType.OR:
+                case (
+                    TokenType.PLUS
+                    | TokenType.MINUS
+                    | TokenType.STAR
+                    | TokenType.SLASH
+                    | TokenType.AND
+                    | TokenType.OR
+                ):
                     operator = token
                 case _:
                     return Err(
