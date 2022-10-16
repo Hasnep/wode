@@ -34,11 +34,11 @@ def main():
     tokens_result = Scanner(source).scan()
     match tokens_result:
         case Ok(tokens):
-            expressions, errors = Parser(tokens).parse_all()
+            expressions, errors = Parser(tokens, source).parse_all()
             if len(errors) > 0:
                 print("Parsing errors:")
                 for error in errors:
-                    print(error)
+                    print(error.get_message())
             else:
                 for expression in expressions:
                     rendered_expression = AstPrinter().convert_to_s_expression(
@@ -47,4 +47,4 @@ def main():
                     print(rendered_expression)
         case Err(errors):
             for error in errors:
-                print(error.message)
+                print(error.get_message())

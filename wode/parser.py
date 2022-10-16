@@ -3,29 +3,31 @@ from typing import List, Tuple
 from koda import Err, Just, Maybe, Ok, Result, nothing
 
 from wode.ast import BinaryExpression, Expression, LiteralExpression, UnaryExpression
+from wode.errors import WodeError, WodeErrorType
 from wode.token import Token
 from wode.token_type import TokenType
 
 
 class Parser:
-    def __init__(self, tokens: List[Token]) -> None:
+    def __init__(self, tokens: List[Token], source: str) -> None:
         self.tokens = tokens
+        self.source = source
         self.current_position: int = 0
 
     def peek(self) -> Token:
         try:
             return self.tokens[self.current_position]
         except IndexError:
-            return Token(TokenType.EOF, "")
+            return Token(TokenType.EOF, "", -1)
 
     def advance(self) -> Token:
         token = self.peek()
         self.current_position += 1
         return token
 
-    def parse_all(self) -> Tuple[List[Expression], List[str]]:
+    def parse_all(self) -> Tuple[List[Expression], List[WodeError]]:
         expressions: List[Expression] = []
-        errors: List[str] = []
+        errors: List[WodeError] = []
 
         token = self.peek()
         while token.token_type != TokenType.EOF:
@@ -38,7 +40,9 @@ class Parser:
             token = self.peek()
         return expressions, errors
 
-    def parse_expression(self, minimum_binding_power: float) -> Result[Expression, str]:
+    def parse_expression(
+        self, minimum_binding_power: float
+    ) -> Result[Expression, WodeError]:
         token = self.advance()
         match token.token_type:
             case TokenType.INTEGER | TokenType.FLOAT | TokenType.STRING | TokenType.IDENTIFIER | TokenType.TRUE | TokenType.FALSE | TokenType.NOTHING:
@@ -54,9 +58,21 @@ class Parser:
                     case Err(err):
                         return Err(err)
             case TokenType.SEMICOLON:
-                return Err("Unexpected end of expression.")
+                return Err(
+                    WodeError(
+                        WodeErrorType.UnexpectedEndOfExpressionError,
+                        self.source,
+                        token.position,
+                    )
+                )
             case _:
-                return Err(f"Unknown primary token type `{token.token_type}`.")
+                return Err(
+                    WodeError(
+                        WodeErrorType.UnexpectedTokenType,
+                        self.source,
+                        token.position,
+                    )
+                )
 
         while True:
             token = self.peek()
@@ -72,7 +88,11 @@ class Parser:
                     operator = token
                 case _:
                     return Err(
-                        f"Unexpected token type `{token.token_type}` directly after `{lhs}`."
+                        WodeError(
+                            WodeErrorType.UnexpectedTokenType,
+                            self.source,
+                            token.position,
+                        )
                     )
 
             maybe_infix_binding_powers = self.get_infix_binding_power(

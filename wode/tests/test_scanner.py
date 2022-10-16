@@ -3,7 +3,6 @@ from koda import Err, Ok
 
 from wode.scanner import Scanner
 from wode.tests.conftest import WodeTestCase, test_cases
-from wode.token import Token
 from wode.token_type import TokenType
 
 success_cases = [x for x in test_cases if len(x.expected_errors) == 0]
@@ -21,12 +20,13 @@ def test_scanner_parses_test_cases(success_case: WodeTestCase):
     tokens_result = Scanner(source).scan()
     match tokens_result:
         case Ok(tokens):
-            assert tokens == (
-                expected_tokens + [Token(TokenType.EOF, "")]
+            tokens_simplified = [(token.token_type, token.lexeme) for token in tokens]
+            assert tokens_simplified == (
+                expected_tokens + [(TokenType.EOF, "")]
             ), f"Test case `{test_case_name}` was not scanned correctly."
         case Err(wode_errors):
-            for e in wode_errors:
-                raise Exception(e.message)
+            for error in wode_errors:
+                raise Exception(error.get_message())
 
 
 @pytest.mark.parametrize(

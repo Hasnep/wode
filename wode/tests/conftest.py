@@ -1,26 +1,27 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, validator
 from ruamel.yaml import YAML as Yaml
 
 from wode.errors import WodeErrorType
-from wode.token import Token
 from wode.token_type import TokenType
 
 DATA_FOLDER = Path(".") / "data"
+
+SimplifiedToken = Tuple[TokenType, str]
 
 
 class WodeTestCase(BaseModel):
     name: str
     source: str
-    expected_tokens: List[Token] = []
+    expected_tokens: List[SimplifiedToken] = []
     expected_errors: List[WodeErrorType] = []
     expected_ast: Optional[List[str]]
 
     @validator("expected_tokens", pre=True, each_item=True)
-    def parse_expected_tokens(cls, x: Dict[str, str]) -> Token:
-        return Token(TokenType(x["token_type"]), x["lexeme"])
+    def parse_expected_tokens(cls, x: Dict[str, str]) -> SimplifiedToken:
+        return (TokenType(x["token_type"]), x["lexeme"])
 
     @validator("expected_errors", pre=True, each_item=True)
     def parse_expected_errors(cls, x: str) -> WodeErrorType:

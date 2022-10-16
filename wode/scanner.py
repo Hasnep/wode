@@ -77,7 +77,7 @@ class Scanner:
         if not self.is_at_end():
             return nothing
 
-        return Just(Token(TokenType.EOF, ""))
+        return Just(Token(TokenType.EOF, "", self.current_position))
 
     def scan_for_whitespace_token(self) -> Maybe[str]:
         first_character = self.get_remaining_source()[:1]
@@ -94,7 +94,7 @@ class Scanner:
         while not self.is_at_end() and self.look_one() != "\n":
             comment += self.look_one()
             self.advance()
-        return Just(Token(TokenType.COMMENT, comment))
+        return Just(Token(TokenType.COMMENT, comment, self.current_position))
 
     def scan_for_string_token(self) -> Result[Maybe[Token], WodeError]:
         if self.look_one() != '"':
@@ -115,18 +115,22 @@ class Scanner:
                 n_quotation_marks_seen += 1
             string += self.look_one()
             self.advance()
-        return Ok(Just(Token(TokenType.STRING, string)))
+        return Ok(Just(Token(TokenType.STRING, string, self.current_position)))
 
     def scan_for_double_character_token(self) -> Maybe[Token]:
         lexeme = self.get_remaining_source()[:2]
         maybe_token_type = mapping_get(double_character_token_mapping, lexeme)
-        maybe_token = maybe_token_type.map(lambda token_type: Token(token_type, lexeme))
+        maybe_token = maybe_token_type.map(
+            lambda token_type: Token(token_type, lexeme, self.current_position)
+        )
         return maybe_token
 
     def scan_for_single_character_token(self) -> Maybe[Token]:
         lexeme = self.get_remaining_source()[:1]
         maybe_token_type = mapping_get(single_character_token_mapping, lexeme)
-        maybe_token = maybe_token_type.map(lambda token_type: Token(token_type, lexeme))
+        maybe_token = maybe_token_type.map(
+            lambda token_type: Token(token_type, lexeme, self.current_position)
+        )
         return maybe_token
 
     def scan_for_number_token(self) -> Result[Maybe[Token], WodeError]:
@@ -167,7 +171,15 @@ class Scanner:
                                         number += c
                                         self.advance()
                                     else:
-                                        return Ok(Just(Token(TokenType.FLOAT, number)))
+                                        return Ok(
+                                            Just(
+                                                Token(
+                                                    TokenType.FLOAT,
+                                                    number,
+                                                    self.current_position,
+                                                )
+                                            )
+                                        )
                             else:
                                 self.advance()
                                 return Err(
@@ -186,7 +198,9 @@ class Scanner:
                                 )
                             )
                 else:
-                    return Ok(Just(Token(TokenType.INTEGER, number)))
+                    return Ok(
+                        Just(Token(TokenType.INTEGER, number, self.current_position))
+                    )
 
     def scan_for_identifier_token(self) -> Maybe[Token]:
         valid_identifier_prefixes = ["_"] + LETTERS
@@ -206,9 +220,15 @@ class Scanner:
                 break
 
         if identifier in reserved_keywords.keys():
-            return Just(Token(TokenType(reserved_keywords[identifier]), identifier))
+            return Just(
+                Token(
+                    TokenType(reserved_keywords[identifier]),
+                    identifier,
+                    self.current_position,
+                )
+            )
         else:
-            return Just(Token(TokenType.IDENTIFIER, identifier))
+            return Just(Token(TokenType.IDENTIFIER, identifier, self.current_position))
 
     def scan_once(self) -> Result[Maybe[Token], WodeError]:
         match self.scan_for_end_of_file_token():

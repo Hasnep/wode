@@ -7,3 +7,4 @@ from wode.token_type import TokenType
 class Token:
     token_type: TokenType
     lexeme: str
+    position: int
