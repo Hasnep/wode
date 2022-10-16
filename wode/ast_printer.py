@@ -30,7 +30,7 @@ class AstPrinter:
                         return value
                     case TokenType.STRING:
                         value = expression.literal.lexeme
-                        return value
+                        return '"' + value + '"'
                     case TokenType.IDENTIFIER:
                         value = expression.literal.lexeme
                         return value

@@ -113,7 +113,8 @@ class Scanner:
                 )
             if self.look_one() == '"':
                 n_quotation_marks_seen += 1
-            string += self.look_one()
+            else:
+                string += self.look_one()
             self.advance()
         return Ok(Just(Token(TokenType.STRING, string, self.current_position)))
 
