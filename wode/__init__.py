@@ -3,8 +3,6 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import Optional
 
-from koda import Err, Ok
-
 from wode.ast_printer import AstPrinter
 from wode.parser import Parser
 from wode.scanner import Scanner
@@ -31,20 +29,17 @@ def main():
         with open(file_path, "r") as f:
             source = f.read()
 
-    tokens_result = Scanner(source).scan()
-    match tokens_result:
-        case Ok(tokens):
-            expressions, errors = Parser(tokens, source).parse_all()
-            if len(errors) > 0:
-                print("Parsing errors:")
-                for error in errors:
-                    print(error.get_message())
-            else:
-                for expression in expressions:
-                    rendered_expression = AstPrinter().convert_to_s_expression(
-                        expression
-                    )
-                    print(rendered_expression)
-        case Err(errors):
+    tokens, scanning_errors = Scanner(source).scan()
+    if len(scanning_errors) > 0:
+        for error in scanning_errors:
+            print(error.get_message())
+    else:
+        expressions, errors = Parser(tokens, source).parse_all()
+        if len(errors) > 0:
+            print("Parsing errors:")
             for error in errors:
                 print(error.get_message())
+        print("Parsed AST:")
+        for expression in expressions:
+            rendered_expression = AstPrinter().convert_to_s_expression(expression)
+            print(rendered_expression)

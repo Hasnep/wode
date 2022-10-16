@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from koda import Err, Just, Maybe, Ok, Result, mapping_get, nothing
 
@@ -304,7 +304,7 @@ class Scanner:
         self.advance()
         return err
 
-    def scan(self) -> Result[List[Token], List[WodeError]]:
+    def scan(self) -> Tuple[List[Token], List[WodeError]]:
         errors: List[WodeError] = []
         while True:
             match self.scan_once():
@@ -313,11 +313,8 @@ class Scanner:
                         case Just(token):
                             self.tokens.append(token)
                             if token.token_type == TokenType.EOF:
-                                if len(errors) > 0:
-                                    return Err(errors)
-                                else:
-                                    return Ok(self.tokens)
+                                return self.tokens, errors
                         case _:
                             pass
-                case Err(err):
-                    errors.append(err)
+                case Err(error):
+                    errors.append(error)
