@@ -292,7 +292,6 @@ class Scanner:
         maybe_identifier_token = self.scan_for_identifier_token()
         match maybe_identifier_token:
             case Just(identifier_token):
-                self.advance()
                 return Ok(Just(identifier_token))
             case _:
                 pass
