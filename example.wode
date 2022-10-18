@@ -3,6 +3,5 @@
 "a string";
 123; # an integer
 123.456; # a float
-foo; # a variable
+true and false; # boolean operators
 nothing; # a keyword
-true and false or true; # boolean operators
