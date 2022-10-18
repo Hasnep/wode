@@ -1,45 +1,41 @@
-import sys
-from argparse import ArgumentParser
 from pathlib import Path
-from typing import Optional
+
+import typer
 
 from wode.ast_to_s_expression import convert_to_s_expression
 from wode.parser import Parser
 from wode.scanner import Scanner
 
-
-def get_file_path() -> Optional[Path]:
-    parser = ArgumentParser()
-    parser.add_argument(
-        "file_path",
-        type=Path,
-        default=None,
-        nargs="?",
-    )
-    args = parser.parse_args()
-    file_path: Optional[Path] = args.file_path
-    return file_path
+cli = typer.Typer(add_completion=False)
 
 
-def main():
-    file_path = get_file_path()
-    if file_path is None:
-        source = sys.stdin.read()
-    else:
-        with open(file_path, "r") as f:
-            source = f.read()
+@cli.command()
+def main(source_file_path: Path = typer.Argument(None, dir_okay=False)):
+    # Read source from file
+    with open(source_file_path, "r") as f:
+        source = f.read()
 
+    # Scan the source code into tokens
     tokens, scanning_errors = Scanner(source).scan()
+
+    # If there were any scanning errors, raise them
     if len(scanning_errors) > 0:
         for error in scanning_errors:
-            print(error.get_message())
+            error_message = error.get_message()
+            print(error_message)
+
     else:
+        # Parse the tokens into an AST
         expressions, errors = Parser(tokens, source).parse_all()
+
+        # If there were any parsing errors, raise them
         if len(errors) > 0:
             print("Parsing errors:")
             for error in errors:
-                print(error.get_message())
-        print("Parsed AST:")
-        for expression in expressions:
-            rendered_expression = convert_to_s_expression(expression)
-            print(rendered_expression)
+                error_message = error.get_message()
+                print(error_message)
+        else:
+            print("Parsed AST:")
+            for expression in expressions:
+                s_expression = convert_to_s_expression(expression)
+                print(s_expression)

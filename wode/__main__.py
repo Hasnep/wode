@@ -1,4 +1,4 @@
-from wode import main
+from wode import cli
 
 if __name__ == "__main__":
-    main()
+    cli()
