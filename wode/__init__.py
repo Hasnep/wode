@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import Optional
 
-from wode.ast_printer import convert_to_s_expression
+from wode.ast_to_s_expression import convert_to_s_expression
 from wode.parser import Parser
 from wode.scanner import Scanner
 

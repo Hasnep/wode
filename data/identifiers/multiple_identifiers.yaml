@@ -5,4 +5,4 @@ expected_tokens:
   - { token_type: plus, lexeme: + }
   - { token_type: identifier, lexeme: bar }
 expected_ast:
-  - (+ foo bar)
+  - ["+", "foo", "bar"]

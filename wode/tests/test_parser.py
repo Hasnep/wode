@@ -1,6 +1,6 @@
 import pytest
 
-from wode.ast_printer import convert_to_s_expression
+from wode.ast_to_s_expression import convert_to_s_expression
 from wode.parser import Parser
 from wode.scanner import Scanner
 from wode.tests.conftest import WodeTestCase, test_cases
@@ -35,6 +35,4 @@ def test_parser(success_case: WodeTestCase):
     # Check the parser works as expected
     expected_ast = success_case.expected_ast
     if expected_ast is not None:
-        assert [convert_to_s_expression(e) for e in expressions] == [
-            sexpr.strip() for sexpr in expected_ast
-        ]
+        assert [convert_to_s_expression(e) for e in expressions] == expected_ast

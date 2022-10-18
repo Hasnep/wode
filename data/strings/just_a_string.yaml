@@ -3,5 +3,6 @@ source: |
 expected_tokens:
   - { token_type: string, lexeme: A string }
 expected_ast:
-  - |
-    "A string"
+  - '"A string"'
+expected_output: |
+  "A string"

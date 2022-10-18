@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel, validator
 from ruamel.yaml import YAML as Yaml
 
+from wode.ast_to_s_expression import SExpression
 from wode.errors import WodeErrorType
 from wode.token_type import TokenType
 
@@ -17,7 +18,7 @@ class WodeTestCase(BaseModel):
     source: str
     expected_tokens: List[SimplifiedToken] = []
     expected_errors: List[WodeErrorType] = []
-    expected_ast: Optional[List[str]]
+    expected_ast: Optional[List[SExpression]]
 
     @validator("expected_tokens", pre=True, each_item=True)
     def parse_expected_tokens(cls, x: Dict[str, str]) -> SimplifiedToken:

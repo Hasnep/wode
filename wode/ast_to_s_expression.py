@@ -1,3 +1,5 @@
+from typing import Any, List
+
 from wode.ast import (
     BinaryExpression,
     Expression,
@@ -7,15 +9,19 @@ from wode.ast import (
 )
 from wode.token_type import TokenType
 
+SExpression = str | List[Any]
 
-def convert_to_s_expression(expression: Expression) -> str:
+
+def convert_to_s_expression(expression: Expression) -> SExpression:
     match expression:
         case BinaryExpression():
-            return add_brackets(
-                expression.operator.lexeme, expression.left, expression.right
-            )
+            return [
+                expression.operator.lexeme,
+                convert_to_s_expression(expression.left),
+                convert_to_s_expression(expression.right),
+            ]
         case GroupingExpression():
-            return add_brackets("group", expression.expression)
+            return ["group", convert_to_s_expression(expression.expression)]
         case LiteralExpression():
             match expression.literal.token_type:
                 case TokenType.FALSE:
@@ -38,12 +44,9 @@ def convert_to_s_expression(expression: Expression) -> str:
                         f"Unknown token type `{expression.literal.token_type}`."
                     )
         case UnaryExpression():
-            return add_brackets(expression.operator.lexeme, expression.right)
+            return [
+                expression.operator.lexeme,
+                convert_to_s_expression(expression.right),
+            ]
         case _:
             raise ValueError(f"Unknown expression type `{type(expression)}`.")
-
-
-def add_brackets(name: str, *expressions: Expression) -> str:
-    sub_expressions = [convert_to_s_expression(e) for e in expressions]
-    values_joined = " ".join(sub_expressions)
-    return f"({name} {values_joined})"
