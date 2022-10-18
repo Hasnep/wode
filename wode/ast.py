@@ -39,3 +39,8 @@ class VariableExpression(Expression):
 @dataclass
 class CommentExpression(Expression):
     token: Token
+
+
+@dataclass
+class PrintExpression(Expression):
+    value: Expression

@@ -30,7 +30,15 @@ pyright:
     poetry run python -m pyright wode
 
 pytest:
-    poetry run python -m pytest wode
+    poetry run python -m pytest -x -vv wode
 
-example:
+transpile_example:
     poetry run python -m wode ./example.wode
+
+format_example:
+    go fmt example.go
+
+run_example:
+    go run example.go
+
+example: transpile_example format_example run_example

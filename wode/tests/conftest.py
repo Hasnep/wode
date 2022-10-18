@@ -19,6 +19,7 @@ class WodeTestCase(BaseModel):
     expected_tokens: List[SimplifiedToken] = []
     expected_errors: List[WodeErrorType] = []
     expected_ast: Optional[List[SExpression]]
+    expected_output = Optional[str]
 
     @validator("expected_tokens", pre=True, each_item=True)
     def parse_expected_tokens(cls, x: Dict[str, str]) -> SimplifiedToken:

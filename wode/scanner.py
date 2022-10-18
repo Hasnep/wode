@@ -1,4 +1,5 @@
-from typing import List, Tuple
+from dataclasses import dataclass
+from typing import Callable, List, Tuple
 
 from koda import Err, Just, Maybe, Ok, Result, mapping_get, nothing
 
@@ -47,6 +48,74 @@ reserved_keywords = {
     "true": TokenType.TRUE,
     "while": TokenType.WHILE,
 }
+
+
+def is_letter(c: str) -> bool:
+    return c in LETTERS
+
+
+def is_digit(c: str) -> bool:
+    return c in DIGITS
+
+
+@dataclass
+class Source:
+    text: str
+    position: int
+
+
+ScannerOutput = Maybe[Tuple[str, Source]]
+
+
+def chomp(source: Source, n: int = 1) -> ScannerOutput:
+    """Return the first n characters and the remaining source."""
+    if len(source.text) < n:
+        return nothing
+    return Just((source.text[:n], Source(source.text[n:], source.position + n)))
+
+
+def test_chomp():
+    source = Source("my test source", 2)
+    assert chomp(source, 2) == Just(("my", Source("test source", 2)))
+    source = Source("", 0)
+    assert chomp(source) == nothing
+
+
+# def peek(source: str, n: int = 1) -> ScannerOutput:
+#     """Return the first n characters and the source."""
+#     if len(source) < n:
+#         return nothing
+#     return Just((source[:n], source))
+
+
+def scan_literal(source: str, value: str) -> ScannerOutput:
+    match chomp(source, len(value)):
+        case Just((first_n_characters, remaining_source)):
+            if first_n_characters == value:
+                return Just((first_n_characters, remaining_source))
+            else:
+                return nothing
+        case _:
+            return nothing
+
+
+def scan_while_callback(
+    source: str, continue_callback: Callable[[str], Maybe[bool]]
+) -> ScannerOutput:
+    token_length = 1
+    while True:
+        match chomp(source, token_length):
+            case Just((first_n_characters, remaining_source)):
+                match continue_callback(first_n_characters):
+                    case Just(callback_output):
+                        if callback_output:
+                            token_length += 1
+                        else:
+                            return Just((first_n_characters, remaining_source))
+                    case _:
+                        return nothing
+            case _:
+                return nothing
 
 
 class Scanner:
