@@ -1,5 +1,13 @@
 # Wode
 
+## Usage
+
+The simplest way to install the Wode transpiler is using [pipx](https://pypa.github.io/pipx/installation/).
+
+```shell
+pipx install git+https://github.com/Hasnep/wode
+```
+
 ## Inspirations
 
 - Direct inspirations
