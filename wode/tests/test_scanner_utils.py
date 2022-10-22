@@ -44,6 +44,12 @@ def test_get_literal_scanner_returns_nothing_when_no_match_is_found():
     assert isinstance(scan_literal(source), Nothing)
 
 
+def test_get_literal_scanner_returns_nothing_when_string_ends():
+    source = Source("")
+    scan_literal = get_literal_scanner("hello")
+    assert isinstance(scan_literal(source), Nothing)
+
+
 def test_get_while_scanner():
     source = Source("123xyz")
     scan_while_is_digit = get_while_scanner(lambda c: Just(is_digit(c)))
@@ -54,7 +60,7 @@ def test_get_while_scanner():
 
 def test_get_while_is_any_literal_scanner():
     source = Source("cabbages")
-    scan_abcdefg = get_while_is_any_literal_scanner({"a", "b", "c", "d", "e", "f", "g"})
+    scan_abcdefg = get_while_is_any_literal_scanner(["a", "b", "c", "d", "e", "f", "g"])
     output = scan_abcdefg(source)
     assert isinstance(output, Just)
     assert output.val == ("cabbage", Source("s", 7))

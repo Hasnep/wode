@@ -68,7 +68,7 @@ def get_while_scanner(continue_callback: Callable[[str], Maybe[bool]]) -> Scanne
     return while_scanner
 
 
-def get_while_is_any_literal_scanner(continue_values: Set[str]) -> Scanner:
+def get_while_is_any_literal_scanner(continue_values: List[str]) -> Scanner:
     return get_while_scanner(lambda c: Just(c in continue_values))
 
 
@@ -107,7 +107,6 @@ def get_delimited_scanner(
 def get_sequence_scanner(scanners: List[Scanner]) -> Scanner:
     def sequence_scanner(source: Source) -> ScannerOutput:
         output = ""
-
         for scanner in scanners:
             match scanner(source):
                 case Just((bite, remaining_source)):
@@ -121,18 +120,34 @@ def get_sequence_scanner(scanners: List[Scanner]) -> Scanner:
     return sequence_scanner
 
 
-# Actual scanners
-def scan_string(source: Source) -> ScannerOutput:
-    return get_delimited_scanner(
-        get_literal_scanner('"'),
-        get_while_is_not_any_literal_scanner({'"'}),
-        get_literal_scanner('"'),
-    )(source)
+def get_any_scanner(scanners: List[Scanner]) -> Scanner:
+    def any_scanner(source: Source) -> ScannerOutput:
+        for scanner in scanners:
+            match scanner(source):
+                case Just((bite, remaining_source)):
+                    return Just((bite, remaining_source))
+                case _:
+                    pass
+        return nothing
+
+    return any_scanner
 
 
-def scan_comment(source: Source) -> ScannerOutput:
-    return get_delimited_scanner(
-        get_literal_scanner("#"),
-        get_while_is_not_any_literal_scanner({"\n"}),
-        get_literal_scanner("\n"),
-    )(source)
+def get_any_literal_scanner(literal_values: List[str]) -> Scanner:
+    return get_any_scanner([get_literal_scanner(literal) for literal in literal_values])
+
+
+def get_repeat_scanner(scanner: Scanner) -> Scanner:
+    def repeat_scanner(source: Source) -> ScannerOutput:
+        output = ""
+        while True:
+            match scanner(source):
+                case Just((bite, remaining_source)):
+                    output += bite
+                    source = remaining_source
+                case _:
+                    if len(output) == 0:
+                        return nothing
+                    return Just((output, source))
+
+    return repeat_scanner

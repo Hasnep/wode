@@ -21,3 +21,4 @@ pipx install git+https://github.com/Hasnep/wode
   - [Crafting Interpreters](https://craftinginterpreters.com) - Robert Nystrom
   - [Monkey](https://monkeylang.org/) - Thorsten Ball
   - [Simple but Powerful Pratt Parsing](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html) - Aleksey Kladov
+  - [Practical Parsing in Rust with nom](https://naiveai.hashnode.dev/practical-parsing-nom) - Eshan Singh
