@@ -135,38 +135,38 @@ def get_one_or_more_of_any_literal_scanner(continue_values: List[str]) -> Scanne
     )
 
 
-def get_delimited_scanner(
-    scan_left_delimiter: Scanner, scan_middle: Scanner, scan_right_delimiter: Scanner
-) -> Scanner:
-    def delimited_scanner(state: ScannerState) -> ScannerOutput:
-        match scan_left_delimiter(state):
-            case Ok(Just((_, new_state))):
-                state = new_state
-            case Ok(_):
-                return Ok(nothing)
-            case Err(err):
-                return Err(err)
+# def get_delimited_scanner(
+#     scan_left_delimiter: Scanner, scan_middle: Scanner, scan_right_delimiter: Scanner
+# ) -> Scanner:
+#     def delimited_scanner(state: ScannerState) -> ScannerOutput:
+#         match scan_left_delimiter(state):
+#             case Ok(Just((_, new_state))):
+#                 state = new_state
+#             case Ok(_):
+#                 return Ok(nothing)
+#             case Err(err):
+#                 return Err(err)
 
-        match scan_middle(state):
-            case Ok(Just((middle_bite_, new_state))):
-                middle_bite = middle_bite_
-                state = new_state
-            case Ok(_):
-                return Ok(nothing)
-            case Err(err):
-                return Err(err)
+#         match scan_middle(state):
+#             case Ok(Just((middle_bite_, new_state))):
+#                 middle_bite = middle_bite_
+#                 state = new_state
+#             case Ok(_):
+#                 return Ok(nothing)
+#             case Err(err):
+#                 return Err(err)
 
-        match scan_right_delimiter(state):
-            case Ok(Just((_, new_state))):
-                state = new_state
-            case Ok(_):
-                return Ok(nothing)
-            case Err(err):
-                return Err(err)
+#         match scan_right_delimiter(state):
+#             case Ok(Just((_, new_state))):
+#                 state = new_state
+#             case Ok(_):
+#                 return Ok(nothing)
+#             case Err(err):
+#                 return Err(err)
 
-        return Ok(Just((middle_bite, state)))
+#         return Ok(Just((middle_bite, state)))
 
-    return delimited_scanner
+#     return delimited_scanner
 
 
 def get_sequence_scanner(scanners: List[Scanner]) -> Scanner:
@@ -206,30 +206,36 @@ def get_any_literal_scanner(literal_values: List[str]) -> Scanner:
     return get_any_scanner([get_literal_scanner(literal) for literal in literal_values])
 
 
-def get_repeat_scanner(scanner: Scanner) -> Scanner:
-    def repeat_scanner(state: ScannerState) -> ScannerOutput:
-        output = ""
-        while True:
-            match scanner(state):
-                case Ok(Just((bite, new_state))):
-                    output += bite
-                    state = new_state
-                case Ok(_):
-                    if len(output) == 0:
-                        return nothing
-                    else:
-                        return Just((output, state))
-                case Err(err):
-                    return Err(err)
+# def get_repeat_scanner(scanner: Scanner) -> Scanner:
+#     def repeat_scanner(state: ScannerState) -> ScannerOutput:
+#         output = ""
+#         while True:
+#             match scanner(state):
+#                 case Ok(Just((bite, new_state))):
+#                     output += bite
+#                     state = new_state
+#                 case Ok(_):
+#                     if len(output) == 0:
+#                         return nothing
+#                     else:
+#                         return Just((output, state))
+#                 case Err(err):
+#                     return Err(err)
 
-    return repeat_scanner
+#     return repeat_scanner
 
 
 def get_eof_scanner() -> Scanner:
     def eof_scanner(state: ScannerState) -> ScannerOutput:
         if len(state.remaining_source) == 0:
-            return nothing
+            return Err(
+                WodeError(
+                    WodeErrorType.UnexpectedEndOfFileError,
+                    state.raw_source,
+                    state.position,
+                )
+            )
         else:
-            return Just(("", state))
+            return Ok(nothing)
 
     return eof_scanner
