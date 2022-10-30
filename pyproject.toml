@@ -34,7 +34,7 @@ profile = "black"
 ignore = ["E501", "E203", "W503", "F401"]
 
 [tool.pytest.ini_options]
-timeout = 10
+timeout = 0.1
 
 [tool.pyright]
 strict = ["**/*"]
