@@ -1,6 +1,7 @@
 source: |
-  nothing
+  nothing;
 expected_tokens:
   - { token_type: nothing, lexeme: nothing }
+  - { token_type: "semicolon", lexeme: ";" }
 expected_ast:
   - nothing

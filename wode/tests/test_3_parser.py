@@ -21,7 +21,7 @@ def test_parser(success_case: WodeTestCase):
         raise Exception("Scanning errors were found in unit test for parser.")
 
     # Parse the tokens
-    expressions, parser_errors = Parser(tokens, success_case.source).parse_all()
+    expressions, parser_errors = Parser(tokens, success_case.source).parse()
 
     # If there were any parser errors, raise them
     if len(parser_errors) > 0:

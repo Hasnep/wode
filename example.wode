@@ -3,5 +3,8 @@
 "a string";
 123; # an integer
 123.456; # a float
-true and false; # boolean operators
 nothing; # a keyword
+1 + 2; # arithmetic
+true and false; # boolean operators
+"a string" + "another string"; # string concatenation
+1 + 2 * 3 - 4 / 5; # order of operations
