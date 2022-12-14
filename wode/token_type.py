@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class TokenType(Enum):
-    #  Single-character tokens
+    # Single-character tokens
     COLON = "colon"
     COMMA = "comma"
     DOT = "dot"
@@ -16,19 +16,20 @@ class TokenType(Enum):
     SEMICOLON = "semicolon"
     SLASH = "slash"
     STAR = "star"
-    # One or two character tokens
+    # Multi-character tokens
     BANG = "bang"
-    BANG_EQUAL = "bang_equal"
     DOUBLE_ARROW = "double_arrow"
-    EQUAL = "equal"
     EQUAL_EQUAL = "equal_equal"
-    GREATER = "greater"
     GREATER_EQUAL = "greater_equal"
-    LESS = "less"
     LESS_EQUAL = "less_equal"
-    MINUS = "minus"
     PIPE = "pipe"
     SINGLE_ARROW = "single_arrow"
+    # Ambiguous single character tokens
+    BANG_EQUAL = "bang_equal"
+    EQUAL = "equal"
+    GREATER = "greater"
+    LESS = "less"
+    MINUS = "minus"
     # Literals
     FLOAT = "float"
     IDENTIFIER = "identifier"
