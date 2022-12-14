@@ -7,6 +7,7 @@ from wode.errors import WodeError, WodeErrorType
 from wode.token import Token
 from wode.token_type import TokenType
 
+triple_character_token_mapping = {"...": TokenType.ELLIPSIS}
 double_character_token_mapping = {
     "->": TokenType.SINGLE_ARROW,
     "!=": TokenType.BANG_EQUAL,
@@ -20,7 +21,6 @@ single_character_token_mapping = {
     ",": TokenType.COMMA,
     ";": TokenType.SEMICOLON,
     ":": TokenType.COLON,
-    ".": TokenType.DOT,
     "(": TokenType.LEFT_BRACKET,
     ")": TokenType.RIGHT_BRACKET,
     "[": TokenType.LEFT_SQUARE_BRACKET,
@@ -36,6 +36,8 @@ single_character_token_mapping = {
     "<": TokenType.LESS,
     "=": TokenType.EQUAL,
     ">": TokenType.GREATER,
+    # Possibly triple tokens
+    ".": TokenType.DOT,
 }
 reserved_keywords = {
     "and": TokenType.AND,
@@ -125,6 +127,14 @@ class Scanner:
                 string += self.look_one()
             self.advance()
         return Ok(Just(Token(TokenType.STRING, string, self.current_position)))
+
+    def scan_for_triple_character_token(self) -> Maybe[Token]:
+        lexeme = self.get_remaining_source()[:3]
+        maybe_token_type = mapping_get(triple_character_token_mapping, lexeme)
+        maybe_token = maybe_token_type.map(
+            lambda token_type: Token(token_type, lexeme, self.current_position)
+        )
+        return maybe_token
 
     def scan_for_double_character_token(self) -> Maybe[Token]:
         lexeme = self.get_remaining_source()[:2]
@@ -271,6 +281,22 @@ class Scanner:
             case err:
                 return err
 
+        maybe_triple_character_token = self.scan_for_triple_character_token()
+        match maybe_triple_character_token:
+            case Just(triple_character_token):
+                self.advance(3)
+                return Ok(Just(triple_character_token))
+            case _:
+                pass
+
+        maybe_double_character_token = self.scan_for_double_character_token()
+        match maybe_double_character_token:
+            case Just(double_character_token):
+                self.advance(2)
+                return Ok(Just(double_character_token))
+            case _:
+                pass
+
         match self.scan_for_number_token():
             case Ok(maybe_number_token):
                 match maybe_number_token:
@@ -281,14 +307,7 @@ class Scanner:
             case err:
                 return err
 
-        maybe_double_character_token = self.scan_for_double_character_token()
-        match maybe_double_character_token:
-            case Just(double_character_token):
-                self.advance(2)
-                return Ok(Just(double_character_token))
-            case _:
-                pass
-
+        # Must go after number token so we don't accidentally parse the dot in .123
         maybe_single_character_token = self.scan_for_single_character_token()
         match maybe_single_character_token:
             case Just(single_character_token):
