@@ -16,24 +16,24 @@ double_character_token_mapping = {
     ">=": TokenType.GREATER_EQUAL,
 }
 single_character_token_mapping = {
+    ",": TokenType.COMMA,
+    ";": TokenType.SEMICOLON,
+    ".": TokenType.DOT,
     "(": TokenType.LEFT_BRACKET,
     ")": TokenType.RIGHT_BRACKET,
-    "{": TokenType.LEFT_CURLY_BRACKET,
-    "}": TokenType.RIGHT_CURLY_BRACKET,
     "[": TokenType.LEFT_SQUARE_BRACKET,
     "]": TokenType.RIGHT_SQUARE_BRACKET,
-    ",": TokenType.COMMA,
-    ".": TokenType.DOT,
-    "+": TokenType.PLUS,
-    ";": TokenType.SEMICOLON,
-    "/": TokenType.SLASH,
+    "{": TokenType.LEFT_CURLY_BRACKET,
+    "}": TokenType.RIGHT_CURLY_BRACKET,
     "*": TokenType.STAR,
+    "/": TokenType.SLASH,
+    "+": TokenType.PLUS,
     # Possibly double tokens
     "-": TokenType.MINUS,
     "!": TokenType.BANG,
+    "<": TokenType.LESS,
     "=": TokenType.EQUAL,
     ">": TokenType.GREATER,
-    "<": TokenType.LESS,
 }
 reserved_keywords = {
     "and": TokenType.AND,
