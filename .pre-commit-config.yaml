@@ -96,5 +96,5 @@ repos:
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.19.2
     hooks:
-      - name: Validate GitHub Actions files
-        id: check-github-actions
+      - name: Validate GitHub Actions workflow files
+        id: check-github-workflows
