@@ -35,17 +35,21 @@ single_character_token_mapping = {
 }
 reserved_keywords = {
     "and": TokenType.AND,
+    "elif": TokenType.ELIF,
     "else": TokenType.ELSE,
     "false": TokenType.FALSE,
     "for": TokenType.FOR,
     "if": TokenType.IF,
+    "in": TokenType.IN,
     "let": TokenType.LET,
+    "match": TokenType.MATCH,
     "nothing": TokenType.NOTHING,
     "or": TokenType.OR,
     "return": TokenType.RETURN,
     "struct": TokenType.STRUCT,
     "true": TokenType.TRUE,
     "while": TokenType.WHILE,
+    "yield": TokenType.YIELD,
 }
 
 

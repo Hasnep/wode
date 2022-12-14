@@ -32,17 +32,21 @@ class TokenType(Enum):
     FLOAT = "float"
     # Keywords
     AND = "and"
+    ELIF = "elif"
     ELSE = "else"
     FALSE = "false"
     FOR = "for"
     IF = "if"
+    IN = "in"
     LET = "let"
+    MATCH = "match"
     NOTHING = "nothing"
     OR = "or"
     RETURN = "return"
     STRUCT = "struct"
     TRUE = "true"
     WHILE = "while"
+    YIELD = "yield"
     # Comments
     COMMENT = "comment"
     # Other
