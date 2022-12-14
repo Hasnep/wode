@@ -32,7 +32,6 @@ repos:
     hooks:
       - name: Sort Python imports
         id: isort
-        args: [--profile, black]
   - repo: https://github.com/psf/black
     rev: 22.12.0
     hooks:
@@ -65,11 +64,6 @@ repos:
       - name: Format YAML files
         id: prettier
         types: [yaml]
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
-    hooks:
-      - name: Sort YAML files
-        id: sort-simple-yaml
 
   # TOML
   - repo: https://github.com/pre-commit/pre-commit-hooks
