@@ -26,6 +26,7 @@ class TokenType(Enum):
     LESS = "less"
     LESS_EQUAL = "less_equal"
     MINUS = "minus"
+    PIPE = "pipe"
     SINGLE_ARROW = "single_arrow"
     # Literals
     IDENTIFIER = "identifier"

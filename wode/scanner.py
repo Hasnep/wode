@@ -14,6 +14,7 @@ double_character_token_mapping = {
     "==": TokenType.EQUAL_EQUAL,
     "=>": TokenType.DOUBLE_ARROW,
     ">=": TokenType.GREATER_EQUAL,
+    "|>": TokenType.PIPE,
 }
 single_character_token_mapping = {
     ",": TokenType.COMMA,
