@@ -1,6 +1,6 @@
 source: |
   !*+-/
-  =<><=>===!=
+  =<><=>===!=->=>
 expected_tokens:
   - { token_type: bang, lexeme: "!" }
   - { token_type: star, lexeme: "*" }
@@ -14,4 +14,6 @@ expected_tokens:
   - { token_type: greater_equal, lexeme: ">=" }
   - { token_type: equal_equal, lexeme: "==" }
   - { token_type: bang_equal, lexeme: "!=" }
+  - { token_type: single_arrow, lexeme: "->" }
+  - { token_type: double_arrow, lexeme: "=>" }
 expected_ast: null

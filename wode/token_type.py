@@ -11,7 +11,6 @@ class TokenType(Enum):
     RIGHT_SQUARE_BRACKET = "right_square_bracket"
     COMMA = "comma"
     DOT = "dot"
-    MINUS = "minus"
     PLUS = "plus"
     SEMICOLON = "semicolon"
     SLASH = "slash"
@@ -19,12 +18,15 @@ class TokenType(Enum):
     # One or two character tokens
     BANG = "bang"
     BANG_EQUAL = "bang_equal"
+    DOUBLE_ARROW = "double_arrow"
     EQUAL = "equal"
     EQUAL_EQUAL = "equal_equal"
     GREATER = "greater"
     GREATER_EQUAL = "greater_equal"
     LESS = "less"
     LESS_EQUAL = "less_equal"
+    MINUS = "minus"
+    SINGLE_ARROW = "single_arrow"
     # Literals
     IDENTIFIER = "identifier"
     STRING = "string"

@@ -8,10 +8,12 @@ from wode.token import Token
 from wode.token_type import TokenType
 
 double_character_token_mapping = {
+    "->": TokenType.SINGLE_ARROW,
     "!=": TokenType.BANG_EQUAL,
-    "==": TokenType.EQUAL_EQUAL,
-    ">=": TokenType.GREATER_EQUAL,
     "<=": TokenType.LESS_EQUAL,
+    "==": TokenType.EQUAL_EQUAL,
+    "=>": TokenType.DOUBLE_ARROW,
+    ">=": TokenType.GREATER_EQUAL,
 }
 single_character_token_mapping = {
     "(": TokenType.LEFT_BRACKET,
@@ -22,12 +24,12 @@ single_character_token_mapping = {
     "]": TokenType.RIGHT_SQUARE_BRACKET,
     ",": TokenType.COMMA,
     ".": TokenType.DOT,
-    "-": TokenType.MINUS,
     "+": TokenType.PLUS,
     ";": TokenType.SEMICOLON,
     "/": TokenType.SLASH,
     "*": TokenType.STAR,
     # Possibly double tokens
+    "-": TokenType.MINUS,
     "!": TokenType.BANG,
     "=": TokenType.EQUAL,
     ">": TokenType.GREATER,
