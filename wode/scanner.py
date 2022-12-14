@@ -19,6 +19,7 @@ double_character_token_mapping = {
 single_character_token_mapping = {
     ",": TokenType.COMMA,
     ";": TokenType.SEMICOLON,
+    ":": TokenType.COLON,
     ".": TokenType.DOT,
     "(": TokenType.LEFT_BRACKET,
     ")": TokenType.RIGHT_BRACKET,
