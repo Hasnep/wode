@@ -1,4 +1,4 @@
 source: |
-  123.
+  123.;
 expected_errors:
   - unterminated_float_error

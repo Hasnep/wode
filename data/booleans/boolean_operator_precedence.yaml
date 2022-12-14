@@ -1,10 +1,11 @@
 source: |
-  true and false or true
+  true and false or true;
 expected_tokens:
   - { token_type: "true", lexeme: "true" }
   - { token_type: and, lexeme: and }
   - { token_type: "false", lexeme: "false" }
   - { token_type: or, lexeme: or }
   - { token_type: "true", lexeme: "true" }
+  - { token_type: "semicolon", lexeme: ";" }
 expected_ast:
   - ["or", ["and", "true", "false"], "true"]

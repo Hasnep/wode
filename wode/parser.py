@@ -1,6 +1,7 @@
+from dataclasses import dataclass
 from typing import List, Tuple
 
-from koda import Err, Just, Maybe, Ok, Result, mapping_get
+from koda import Err, Ok, Result
 
 from wode.ast import BinaryExpression, Expression, LiteralExpression, UnaryExpression
 from wode.errors import WodeError, WodeErrorType
@@ -8,154 +9,190 @@ from wode.token import Token
 from wode.token_type import TokenType
 
 
-class Parser:
-    def __init__(self, tokens: List[Token], source: str) -> None:
-        self.tokens = tokens
-        self.source = source
-        self.current_position: int = 0
+@dataclass
+class ParserState:
+    _all_tokens: List[Token]
+    source: str
+    position: int = 0
 
-    def peek(self) -> Token:
+    def chomp(self) -> Tuple[Token, "ParserState"]:
         try:
-            return self.tokens[self.current_position]
+            return self._all_tokens[self.position], ParserState(
+                self._all_tokens, self.source, self.position + 1
+            )
         except IndexError:
-            return Token(TokenType.EOF, "", -1)
+            return Token(TokenType.EOF, "", -1), ParserState(
+                self._all_tokens, self.source, self.position + 1
+            )
 
-    def advance(self) -> Token:
-        token = self.peek()
-        self.current_position += 1
-        return token
+    def debug_dump(self) -> None:
+        for i, token in enumerate(self._all_tokens):
+            print(
+                f"{i} {token.token_type}: {token.lexeme}{' <--' if i == self.position else ''}"
+            )
 
-    def parse_all(self) -> Tuple[List[Expression], List[WodeError]]:
-        expressions: List[Expression] = []
-        errors: List[WodeError] = []
 
-        token = self.peek()
-        while token.token_type != TokenType.EOF:
-            expression_result = self.parse_expression(minimum_binding_power=0)
-            match expression_result:
-                case Ok(expression):
-                    expressions.append(expression)
-                case Err(err):
-                    errors.append(err)
-            token = self.peek()
-        return expressions, errors
+def get_infix_binding_power(operator: TokenType) -> Tuple[float, float]:
+    operator_binding_power_mapping = {
+        TokenType.STAR: (8, 8.1),
+        TokenType.SLASH: (8, 8.1),
+        TokenType.PLUS: (7, 7.1),
+        TokenType.MINUS: (7, 7.1),
+        TokenType.AND: (6.1, 6),
+        TokenType.OR: (5.1, 5),
+    }
+    try:
+        return operator_binding_power_mapping[operator]
+    except KeyError as err:
+        raise KeyError(
+            f"Couldn't find infix binding power for infix operator `{operator}`."
+        ) from err
 
-    def parse_expression(
-        self, minimum_binding_power: float
-    ) -> Result[Expression, WodeError]:
-        token = self.advance()
-        match token.token_type:
-            case (
-                TokenType.INTEGER
-                | TokenType.FLOAT
-                | TokenType.STRING
-                | TokenType.IDENTIFIER
-                | TokenType.TRUE
-                | TokenType.FALSE
-                | TokenType.NOTHING
-            ):
-                lhs = LiteralExpression(token)
-            case TokenType.PLUS | TokenType.MINUS:
-                binding_power_left, binding_power_right = self.get_prefix_binding_power(
-                    token.token_type
-                )
-                rhs_result = self.parse_expression(binding_power_right)
-                match rhs_result:
-                    case Ok(rhs):
-                        lhs = UnaryExpression(token, rhs)
-                    case Err(err):
-                        return Err(err)
-            case TokenType.SEMICOLON:
-                return Err(
+
+def get_prefix_binding_power(operator: TokenType) -> Tuple[None, float]:
+    match operator:
+        case TokenType.PLUS | TokenType.MINUS:
+            return (None, 7.1)
+        case TokenType.BANG:
+            return (None, 5.1)
+        case _:
+            raise ValueError(f"Unknown binding power for prefix operator `{operator}`.")
+
+
+def parse_expression(
+    state: ParserState, minimum_binding_power: float
+) -> Tuple[Result[Expression, WodeError], ParserState]:
+    token, state = state.chomp()
+    match token.token_type:
+        case (
+            TokenType.INTEGER
+            | TokenType.FLOAT
+            | TokenType.STRING
+            | TokenType.IDENTIFIER
+            | TokenType.TRUE
+            | TokenType.FALSE
+            | TokenType.NOTHING
+        ):
+            lhs = LiteralExpression(token)
+        case TokenType.PLUS | TokenType.MINUS:
+            # Prefix plus or minus
+            binding_power_left, binding_power_right = get_prefix_binding_power(
+                token.token_type
+            )
+            rhs_result = parse_expression(state, binding_power_right)
+            match rhs_result:
+                case Ok(rhs), new_state:
+                    lhs = UnaryExpression(token, rhs)
+                    state = new_state
+                case Err(err), new_state:
+                    return Err(err), new_state
+                case _:
+                    raise ValueError("?????")
+        case TokenType.SEMICOLON:
+            return (
+                Err(
                     WodeError(
                         WodeErrorType.UnexpectedEndOfExpressionError,
-                        self.source,
+                        state.source,
                         token.position,
                     )
-                )
-            case _:
-                return Err(
+                ),
+                state,
+            )
+        case _:
+            return (
+                Err(
                     WodeError(
                         WodeErrorType.UnexpectedTokenType,
-                        self.source,
-                        token.position,
+                        state.source,
+                        token.position - 1,
                     )
-                )
+                ),
+                state,
+            )
 
-        while True:
-            token = self.peek()
-            match token.token_type:
-                case TokenType.EOF:
+    while True:
+        token, new_state = state.chomp()
+        match token.token_type:
+            case TokenType.EOF:
+                break
+            case TokenType.SEMICOLON:
+                # Finish parsing this expression
+                break
+            case (
+                TokenType.PLUS
+                | TokenType.MINUS
+                | TokenType.STAR
+                | TokenType.SLASH
+                | TokenType.AND
+                | TokenType.OR
+            ):
+                # Don't consume the token yet, we don't know its binding power yet
+                operator = token
+                binding_power_left, binding_power_right = get_infix_binding_power(
+                    operator.token_type
+                )
+                if binding_power_left < minimum_binding_power:
+                    # Stop iterating if we have found an operator with lower binding power than the minimum
+                    # We didn't consume the token yet in case this happened
                     break
-                case TokenType.SEMICOLON:
-                    # Consume the semicolon
-                    self.advance()
-                    # Finish parsing this expression
-                    break
-                case (
-                    TokenType.PLUS
-                    | TokenType.MINUS
-                    | TokenType.STAR
-                    | TokenType.SLASH
-                    | TokenType.AND
-                    | TokenType.OR
-                ):
-                    operator = token
-                case _:
-                    return Err(
+                # Now we can consume the token
+                state = new_state
+                # If we found an infix operator, try to parse the right hand side
+                rhs_result, state = parse_expression(state, binding_power_right)
+                match rhs_result:
+                    case Ok(rhs):
+                        lhs = BinaryExpression(lhs, operator, rhs)
+                    case Err(err):
+                        return Err(err), state
+            case _:
+                state = new_state
+                return (
+                    Err(
                         WodeError(
                             WodeErrorType.UnexpectedTokenType,
-                            self.source,
+                            state.source,
                             token.position,
                         )
-                    )
-
-            maybe_infix_binding_powers = self.get_infix_binding_power(
-                operator.token_type
-            )
-            # Check if we found an infix operator
-            match maybe_infix_binding_powers:
-                case Just((binding_power_left, binding_power_right)):
-                    # Stop iterating if we have found an operator with lower binding power than the minimum
-                    if binding_power_left < minimum_binding_power:
-                        break
-
-                    # We peeked at the operator earlier, now we consume it
-                    self.advance()
-                    # If we found an infix operator, try to parse the right hand side
-                    rhs_result = self.parse_expression(binding_power_right)
-                    match rhs_result:
-                        case Ok(rhs):
-                            lhs = BinaryExpression(lhs, operator, rhs)
-                            continue
-                        case Err(err):
-                            return Err(err)
-                # If we didn't find an infix operator, keep parsing
-                case _:
-                    pass
-
-        return Ok(lhs)
-
-    def get_infix_binding_power(
-        self, operator: TokenType
-    ) -> Maybe[Tuple[float, float]]:
-        operator_binding_power_mapping = {
-            TokenType.STAR: (8, 8.1),
-            TokenType.SLASH: (8, 8.1),
-            TokenType.PLUS: (7, 7.1),
-            TokenType.MINUS: (7, 7.1),
-            TokenType.AND: (6.1, 6),
-            TokenType.OR: (5.1, 5),
-        }
-        return mapping_get(operator_binding_power_mapping, operator)
-
-    def get_prefix_binding_power(self, operator: TokenType) -> Tuple[None, float]:
-        match operator:
-            case TokenType.PLUS | TokenType.MINUS:
-                return (None, 7.1)
-            case TokenType.BANG:
-                return (None, 5.1)
-            case _:
-                raise ValueError(
-                    f"Unknown binding power for prefix operator `{operator}`."
+                    ),
+                    state,
                 )
+
+    return Ok(lhs), state
+
+
+def parse_all(state: ParserState) -> Tuple[List[Expression], List[WodeError]]:
+    expressions: List[Expression] = []
+    errors: List[WodeError] = []
+
+    while True:
+        # If we see an EOF, stop parsing
+        if state.chomp()[0].token_type == TokenType.EOF:
+            return expressions, errors
+
+        expression_result, state = parse_expression(state, minimum_binding_power=0)
+        match expression_result:
+            case Ok(expression):
+                token, new_state = state.chomp()
+                if token.token_type == TokenType.SEMICOLON:
+                    state = new_state
+                    expressions.append(expression)
+                else:
+                    # If we don't see a semicolon, raise an error
+                    errors.append(
+                        WodeError(
+                            WodeErrorType.ExpectedSemicolonError,
+                            state.source,
+                            token.position - 1,
+                        )
+                    )
+            case Err(err):
+                errors.append(err)
+
+
+class Parser:
+    def __init__(self, tokens: List[Token], source: str):
+        self.state = ParserState(tokens, source)
+
+    def parse(self) -> Tuple[List[Expression], List[WodeError]]:
+        return parse_all(self.state)

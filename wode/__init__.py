@@ -26,7 +26,7 @@ def main(source_file_path: Path = typer.Argument(None, dir_okay=False)):
 
     else:
         # Parse the tokens into an AST
-        expressions, errors = Parser(tokens, source).parse_all()
+        expressions, errors = Parser(tokens, source).parse()
 
         # If there were any parsing errors, raise them
         if len(errors) > 0:

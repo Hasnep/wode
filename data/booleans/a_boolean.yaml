@@ -1,6 +1,7 @@
 source: |
-  true
+  true;
 expected_tokens:
   - { token_type: "true", lexeme: "true" }
+  - { token_type: "semicolon", lexeme: ";" }
 expected_ast:
   - "true"

@@ -1,4 +1,4 @@
 source: |
-  .456
+  .456;
 expected_errors:
   - no_leading_zero_on_float_error

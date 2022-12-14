@@ -10,6 +10,7 @@ class WodeErrorType(Enum):
     NoLeadingZeroOnFloatError = "no_leading_zero_on_float_error"
     UnexpectedEndOfExpressionError = "unexpected_end_of_expression_error"
     UnexpectedTokenType = "UnexpectedTokenType"
+    ExpectedSemicolonError = "ExpectedSemicolonError"
 
 
 class WodeError:
