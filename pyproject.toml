@@ -21,6 +21,7 @@ pydantic = "^1.10.2"
 pydocstyle = "^6.1.1"
 pyright = "^1.1.283"
 pytest = "^7.2.0"
+pytest-cov = "^4.0.0"
 pytest-timeout = "^2.1.0"
 ruamel-yaml = "^0.17.21"
 ssort = "^0.11.6"
@@ -36,6 +37,7 @@ ignore = ["E501", "E203", "W503", "F401"]
 
 [tool.pytest.ini_options]
 timeout = 0.1
+addopts = "--cov=wode --cov-report=html"
 
 [tool.pyright]
 strict = ["**/*"]
