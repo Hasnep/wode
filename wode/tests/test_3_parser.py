@@ -36,3 +36,6 @@ def test_parser(success_case: WodeTestCase):
     expected_ast = success_case.expected_ast
     if expected_ast is not None:
         assert [convert_to_s_expression(e) for e in expressions] == expected_ast
+
+    if success_case.broken:
+        pytest.xfail()

@@ -29,6 +29,9 @@ def test_scanner_parses_test_cases(success_case: WodeTestCase):
         expected_tokens + [(TokenType.EOF, "")]
     ), f"Test case `{test_case_name}` was not scanned correctly."
 
+    if success_case.broken:
+        pytest.xfail()
+
 
 @pytest.mark.parametrize(
     "failure_case", failure_cases, ids=[x.name for x in failure_cases]
@@ -50,3 +53,6 @@ def test_scanner_fails_on_failure_cases(failure_case: WodeTestCase):
     assert (
         errors[0].error_type == expected_error_types[0]
     ), f"Test case `{test_case_name}` should have returned `{expected_error_types}` error."
+
+    if failure_case.broken:
+        pytest.xfail()
