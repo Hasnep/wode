@@ -1,0 +1,18 @@
+source: |
+  -1*2+3/(4+5);
+expected_tokens:
+  - { token_type: minus, lexeme: "-" }
+  - { token_type: integer, lexeme: "1" }
+  - { token_type: star, lexeme: "*" }
+  - { token_type: integer, lexeme: "2" }
+  - { token_type: plus, lexeme: "+" }
+  - { token_type: integer, lexeme: "3" }
+  - { token_type: slash, lexeme: "/" }
+  - { token_type: left_bracket, lexeme: ( }
+  - { token_type: integer, lexeme: "4" }
+  - { token_type: plus, lexeme: "+" }
+  - { token_type: integer, lexeme: "5" }
+  - { token_type: right_bracket, lexeme: ) }
+  - { token_type: "semicolon", lexeme: ";" }
+expected_ast:
+  - ["+", ["*", ["-", "1"], "2"], ["/", "3", ["+", "4", "5"]]]
