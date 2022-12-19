@@ -1,0 +1,8 @@
+{
+  "source": "123;",
+  "expected_tokens": [
+    { "token_type": "integer", "lexeme": "123" },
+    { "token_type": "semicolon", "lexeme": ";" }
+  ],
+  "expected_ast": ["123"]
+}

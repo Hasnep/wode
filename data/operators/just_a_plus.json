@@ -1,0 +1,5 @@
+{
+  "source": "+",
+  "expected_tokens": [{ "token_type": "plus", "lexeme": "+" }],
+  "expected_ast": null
+}

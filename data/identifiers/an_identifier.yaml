@@ -1,6 +1,0 @@
-source: |
-  foo;
-expected_tokens:
-  - { token_type: identifier, lexeme: foo }
-  - { token_type: "semicolon", lexeme: ";" }
-expected_ast: null
