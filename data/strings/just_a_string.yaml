@@ -1,9 +1,0 @@
-source: |
-  "A string";
-expected_tokens:
-  - { token_type: string, lexeme: A string }
-  - { token_type: "semicolon", lexeme: ";" }
-expected_ast:
-  - '"A string"'
-expected_output: |
-  "A string"

@@ -1,5 +1,0 @@
-source: |
-  !=
-expected_tokens:
-  - { token_type: bang_equal, lexeme: "!=" }
-expected_ast: null

@@ -1,4 +1,0 @@
-source: ""
-expected_tokens: []
-expected_ast: null # TODO: Allow parsing empty programs
-expected_output: ""

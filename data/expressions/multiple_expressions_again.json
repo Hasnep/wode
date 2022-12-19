@@ -1,0 +1,18 @@
+{
+  "source": "\"a string\";\n123;\n123.456;\ntrue;\nfalse;\nnothing;",
+  "expected_tokens": [
+    { "token_type": "string", "lexeme": "a string" },
+    { "token_type": "semicolon", "lexeme": ";" },
+    { "token_type": "integer", "lexeme": "123" },
+    { "token_type": "semicolon", "lexeme": ";" },
+    { "token_type": "float", "lexeme": "123.456" },
+    { "token_type": "semicolon", "lexeme": ";" },
+    { "token_type": "true", "lexeme": "true" },
+    { "token_type": "semicolon", "lexeme": ";" },
+    { "token_type": "false", "lexeme": "false" },
+    { "token_type": "semicolon", "lexeme": ";" },
+    { "token_type": "nothing", "lexeme": "nothing" },
+    { "token_type": "semicolon", "lexeme": ";" }
+  ],
+  "expected_ast": ["\"a string\"", "123", "123.456", "true", "false", "nothing"]
+}

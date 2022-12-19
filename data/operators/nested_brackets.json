@@ -1,0 +1,12 @@
+{
+  "source": "[{()}]",
+  "expected_tokens": [
+    { "token_type": "left_square_bracket", "lexeme": "[" },
+    { "token_type": "left_curly_bracket", "lexeme": "{" },
+    { "token_type": "left_bracket", "lexeme": "(" },
+    { "token_type": "right_bracket", "lexeme": ")" },
+    { "token_type": "right_curly_bracket", "lexeme": "}" },
+    { "token_type": "right_square_bracket", "lexeme": "]" }
+  ],
+  "expected_ast": null
+}

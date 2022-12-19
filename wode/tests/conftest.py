@@ -1,8 +1,8 @@
+import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from pydantic import BaseModel, validator
-from ruamel.yaml import YAML as Yaml
 
 from wode.ast_to_s_expression import SExpression
 from wode.errors import WodeErrorType
@@ -34,11 +34,10 @@ def get_test_cases() -> List[WodeTestCase]:
     def _read_test_case(file_path: Path) -> WodeTestCase:
         print(f"Loading `{file_path}`.")
         with open(file_path, "r") as f:
-            test_case_dict: Dict[str, Any] = yaml.load(f)  # type: ignore
+            test_case_dict: Dict[str, Any] = json.load(f)
         test_case_name = file_path.stem
         return WodeTestCase(name=test_case_name, **test_case_dict)
 
-    yaml = Yaml()  # type: ignore
     test_case_file_paths = DATA_FOLDER.glob("**/*.yaml")
     return [_read_test_case(p) for p in test_case_file_paths]
 
