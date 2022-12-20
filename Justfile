@@ -30,7 +30,7 @@ pyright:
     poetry run python -m pyright wode
 
 pytest:
-    poetry run python -m pytest wode
+    poetry run python -m pytest -vv wode
 
 report: test
     poetry run python -m http.server --directory=htmlcov
