@@ -1,5 +1,0 @@
-{
-  "source": "# Comment spanning\n# Multiple lines",
-  "expected_tokens": [],
-  "expected_ast": null
-}
