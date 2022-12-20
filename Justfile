@@ -32,7 +32,7 @@ pyright:
 pytest:
     poetry run python -m pytest -vv wode
 
-report: test
+coverage:
     poetry run python -m http.server --directory=htmlcov
 
 example:
