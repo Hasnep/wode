@@ -1,5 +1,0 @@
-{
-  "source": "\"This is an un-terminated string",
-  "expected_errors": ["unexpected_end_of_file_error"],
-  "expected_ast": null
-}
