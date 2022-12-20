@@ -1,6 +1,6 @@
 from pathlib import Path
 from textwrap import dedent
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from wode.ast_to_s_expression import SExpression
 from wode.errors import WodeErrorType
@@ -15,18 +15,29 @@ class WodeTestCase:
         self,
         source: str,
         expected_tokens: List[Token] = [],
-        expected_scanner_errors: List[WodeErrorType] = [],
+        expected_scanner_error_types: List[WodeErrorType] = [],
         expected_ast: Optional[List[SExpression]] = None,
         broken: bool = False,
     ) -> None:
+        if len(expected_tokens) > 0 and len(expected_scanner_error_types) > 0:
+            raise ValueError(
+                dedent(
+                    f"""
+                    Test case specified both
+                    expected_tokens: {expected_tokens}
+                    and
+                    expected_scanner_error_types: {expected_scanner_error_types}
+                    """
+                )
+            )
         self.source = dedent(source)
         self.expected_tokens = expected_tokens
-        self.expected_errors = expected_scanner_errors
+        self.expected_scanner_error_types = expected_scanner_error_types
         self.expected_ast = expected_ast
         self.broken = broken
 
 
-test_cases: Dict[str, Dict[str, WodeTestCase]] = {
+test_cases = {
     "null case": {
         # TODO: Allow parsing empty programs
         "null case": WodeTestCase(
@@ -36,12 +47,13 @@ test_cases: Dict[str, Dict[str, WodeTestCase]] = {
         )
     },
     "comments": {
+        # TODO: Allow parsing empty programs
         "a comment": WodeTestCase(
             source="""
             # This is a comment
             """,
             expected_tokens=[],
-            expected_ast=None,  # TODO: Allow parsing empty programs
+            expected_ast=None,
         ),
         "multiple comments": WodeTestCase(
             source="""
@@ -77,19 +89,26 @@ test_cases: Dict[str, Dict[str, WodeTestCase]] = {
             source="""
             .456;
             """,
-            expected_scanner_errors=[WodeErrorType.NoLeadingZeroOnFloatError],
+            expected_scanner_error_types=[
+                WodeErrorType.NoLeadingZeroOnFloatError,
+            ],
         ),
         "unterminated float": WodeTestCase(
             source="""
             123.;
             """,
-            expected_scanner_errors=[WodeErrorType.UnterminatedFloatError],
+            expected_scanner_error_types=[
+                WodeErrorType.UnterminatedFloatError,
+            ],
         ),
         "too many decimal points": WodeTestCase(
             source="""
             123.456.789;
             """,
-            expected_scanner_errors=[WodeErrorType.NoLeadingZeroOnFloatError],
+            expected_scanner_error_types=[
+                # TODO: Maybe make a new error type for this case
+                WodeErrorType.NoLeadingZeroOnFloatError,
+            ],
         ),
     },
     "identifiers": {
@@ -139,7 +158,7 @@ test_cases: Dict[str, Dict[str, WodeTestCase]] = {
             source="""
             "This is an un-terminated string
             """,
-            expected_scanner_errors=[WodeErrorType.UnexpectedEndOfFileError],
+            expected_scanner_error_types=[WodeErrorType.UnexpectedEndOfFileError],
             expected_ast=None,
         ),
         "a multiline string": WodeTestCase(
@@ -158,7 +177,7 @@ test_cases: Dict[str, Dict[str, WodeTestCase]] = {
             "This is an
             un-terminated multiline-string
             """,
-            expected_scanner_errors=[WodeErrorType.UnexpectedEndOfFileError],
+            expected_scanner_error_types=[WodeErrorType.UnexpectedEndOfFileError],
             expected_ast=None,
         ),
     },
@@ -438,8 +457,8 @@ test_cases: Dict[str, Dict[str, WodeTestCase]] = {
 }
 
 
-test_cases_flattened = [
-    (f"{category} - {test_case_name}", test_case)
+test_cases_flattened = {
+    f"{category} - {test_case_name}": test_case
     for category, category_test_cases in test_cases.items()
     for test_case_name, test_case in category_test_cases.items()
-]
+}
