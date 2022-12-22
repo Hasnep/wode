@@ -1,20 +1,26 @@
+from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
 from typing import List, Optional
 
 from wode.ast_to_s_expression import SExpression
 from wode.errors import WodeErrorType
-from wode.token import Token
 from wode.token_type import TokenType
 
 DATA_FOLDER = Path(".") / "data"
+
+
+@dataclass
+class SimplifiedToken:
+    token_type: TokenType
+    lexeme: str
 
 
 class WodeTestCase:
     def __init__(
         self,
         source: str,
-        expected_tokens: List[Token] = [],
+        expected_tokens: List[SimplifiedToken] = [],
         expected_scanner_error_types: List[WodeErrorType] = [],
         expected_ast: Optional[List[SExpression]] = None,
         broken: bool = False,
@@ -70,8 +76,8 @@ test_cases = {
             123;
             """,
             expected_tokens=[
-                Token(TokenType.INTEGER, "123", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.INTEGER, "123"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=["123"],
         ),
@@ -80,8 +86,8 @@ test_cases = {
             123.456;
             """,
             expected_tokens=[
-                Token(TokenType.FLOAT, "123.456", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.FLOAT, "123.456"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=["123.456"],
         ),
@@ -106,8 +112,7 @@ test_cases = {
             123.456.789;
             """,
             expected_scanner_error_types=[
-                # TODO: Maybe make a new error type for this case
-                WodeErrorType.NoLeadingZeroOnFloatError,
+                WodeErrorType.TooManyDecimalPointsError,
             ],
         ),
     },
@@ -117,8 +122,8 @@ test_cases = {
             foo;
             """,
             expected_tokens=[
-                Token(TokenType.IDENTIFIER, "foo", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.IDENTIFIER, "foo"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=None,
         ),
@@ -127,8 +132,8 @@ test_cases = {
             nothing;
             """,
             expected_tokens=[
-                Token(TokenType.NOTHING, "nothing", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.NOTHING, "nothing"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=["nothing"],
         ),
@@ -137,8 +142,8 @@ test_cases = {
             true;
             """,
             expected_tokens=[
-                Token(TokenType.TRUE, "true", 0),
-                Token(TokenType.SEMICOLON, ";", 5),
+                SimplifiedToken(TokenType.TRUE, "true"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=["true"],
         ),
@@ -149,8 +154,8 @@ test_cases = {
             "this is a string";
             """,
             expected_tokens=[
-                Token(TokenType.STRING, "this is a string", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.STRING, "this is a string"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=['"this is a string"'],
         ),
@@ -167,8 +172,8 @@ test_cases = {
             multiline string";
             """,
             expected_tokens=[
-                Token(TokenType.STRING, "This is a\nmultiline string", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.STRING, "This is a\nmultiline string"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=['"This is a\nmultiline string"'],
         ),
@@ -187,8 +192,8 @@ test_cases = {
             123;
             """,
             expected_tokens=[
-                Token(TokenType.INTEGER, "123", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.INTEGER, "123"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=["123"],
         ),
@@ -201,14 +206,14 @@ test_cases = {
             123; 456;
             """,
             expected_tokens=[
-                Token(TokenType.INTEGER, "123", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
-                Token(TokenType.INTEGER, "456", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
-                Token(TokenType.INTEGER, "123", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
-                Token(TokenType.INTEGER, "456", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.INTEGER, "123"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
+                SimplifiedToken(TokenType.INTEGER, "456"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
+                SimplifiedToken(TokenType.INTEGER, "123"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
+                SimplifiedToken(TokenType.INTEGER, "456"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=["123", "456", "123", "456"],
         ),
@@ -222,18 +227,18 @@ test_cases = {
             nothing;
             """,
             expected_tokens=[
-                Token(TokenType.STRING, "a string", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
-                Token(TokenType.INTEGER, "123", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
-                Token(TokenType.FLOAT, "123.456", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
-                Token(TokenType.TRUE, "true", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
-                Token(TokenType.FALSE, "false", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
-                Token(TokenType.NOTHING, "nothing", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.STRING, "a string"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
+                SimplifiedToken(TokenType.INTEGER, "123"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
+                SimplifiedToken(TokenType.FLOAT, "123.456"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
+                SimplifiedToken(TokenType.TRUE, "true"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
+                SimplifiedToken(TokenType.FALSE, "false"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
+                SimplifiedToken(TokenType.NOTHING, "nothing"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=['"a string"', "123", "123.456", "true", "false", "nothing"],
         ),
@@ -243,7 +248,7 @@ test_cases = {
             source="""
             +
             """,
-            expected_tokens=[Token(TokenType.PLUS, "+", -1)],
+            expected_tokens=[SimplifiedToken(TokenType.PLUS, "+")],
             expected_ast=None,
         ),
         "two plusses": WodeTestCase(
@@ -251,8 +256,8 @@ test_cases = {
             ++
             """,
             expected_tokens=[
-                Token(TokenType.PLUS, "+", -1),
-                Token(TokenType.PLUS, "+", -1),
+                SimplifiedToken(TokenType.PLUS, "+"),
+                SimplifiedToken(TokenType.PLUS, "+"),
             ],
             expected_ast=None,
         ),
@@ -261,8 +266,8 @@ test_cases = {
             */
             """,
             expected_tokens=[
-                Token(TokenType.STAR, "*", -1),
-                Token(TokenType.SLASH, "/", -1),
+                SimplifiedToken(TokenType.STAR, "*"),
+                SimplifiedToken(TokenType.SLASH, "/"),
             ],
             expected_ast=None,
         ),
@@ -271,7 +276,7 @@ test_cases = {
             !=
             """,
             expected_tokens=[
-                Token(TokenType.BANG_EQUAL, "!=", -1),
+                SimplifiedToken(TokenType.BANG_EQUAL, "!="),
             ],
             expected_ast=None,
         ),
@@ -280,8 +285,8 @@ test_cases = {
             !=!
             """,
             expected_tokens=[
-                Token(TokenType.BANG_EQUAL, "!=", -1),
-                Token(TokenType.BANG, "!", -1),
+                SimplifiedToken(TokenType.BANG_EQUAL, "!="),
+                SimplifiedToken(TokenType.BANG, "!"),
             ],
             expected_ast=None,
         ),
@@ -290,7 +295,7 @@ test_cases = {
             ...
             """,
             expected_tokens=[
-                Token(TokenType.ELLIPSIS, "...", -1),
+                SimplifiedToken(TokenType.ELLIPSIS, "..."),
             ],
             expected_ast=None,
         ),
@@ -300,20 +305,20 @@ test_cases = {
             =<><=>===!=->=>
             """,
             expected_tokens=[
-                Token(TokenType.BANG, "!", -1),
-                Token(TokenType.STAR, "*", -1),
-                Token(TokenType.PLUS, "+", -1),
-                Token(TokenType.MINUS, "-", -1),
-                Token(TokenType.SLASH, "/", -1),
-                Token(TokenType.EQUAL, "=", -1),
-                Token(TokenType.LESS, "<", -1),
-                Token(TokenType.GREATER, ">", -1),
-                Token(TokenType.LESS_EQUAL, "<=", -1),
-                Token(TokenType.GREATER_EQUAL, ">=", -1),
-                Token(TokenType.EQUAL_EQUAL, "==", -1),
-                Token(TokenType.BANG_EQUAL, "!=", -1),
-                Token(TokenType.SINGLE_ARROW, "->", -1),
-                Token(TokenType.DOUBLE_ARROW, "=>", -1),
+                SimplifiedToken(TokenType.BANG, "!"),
+                SimplifiedToken(TokenType.STAR, "*"),
+                SimplifiedToken(TokenType.PLUS, "+"),
+                SimplifiedToken(TokenType.MINUS, "-"),
+                SimplifiedToken(TokenType.SLASH, "/"),
+                SimplifiedToken(TokenType.EQUAL, "="),
+                SimplifiedToken(TokenType.LESS, "<"),
+                SimplifiedToken(TokenType.GREATER, ">"),
+                SimplifiedToken(TokenType.LESS_EQUAL, "<="),
+                SimplifiedToken(TokenType.GREATER_EQUAL, ">="),
+                SimplifiedToken(TokenType.EQUAL_EQUAL, "=="),
+                SimplifiedToken(TokenType.BANG_EQUAL, "!="),
+                SimplifiedToken(TokenType.SINGLE_ARROW, "->"),
+                SimplifiedToken(TokenType.DOUBLE_ARROW, "=>"),
             ],
             expected_ast=None,
         ),
@@ -322,8 +327,8 @@ test_cases = {
             ()
             """,
             expected_tokens=[
-                Token(TokenType.LEFT_BRACKET, "(", -1),
-                Token(TokenType.RIGHT_BRACKET, ")", -1),
+                SimplifiedToken(TokenType.LEFT_BRACKET, "("),
+                SimplifiedToken(TokenType.RIGHT_BRACKET, ")"),
             ],
             expected_ast=None,
         ),
@@ -332,12 +337,12 @@ test_cases = {
             [{()}]
             """,
             expected_tokens=[
-                Token(TokenType.LEFT_SQUARE_BRACKET, "[", -1),
-                Token(TokenType.LEFT_CURLY_BRACKET, "{", -1),
-                Token(TokenType.LEFT_BRACKET, "(", -1),
-                Token(TokenType.RIGHT_BRACKET, ")", -1),
-                Token(TokenType.RIGHT_CURLY_BRACKET, "}", -1),
-                Token(TokenType.RIGHT_SQUARE_BRACKET, "]", -1),
+                SimplifiedToken(TokenType.LEFT_SQUARE_BRACKET, "["),
+                SimplifiedToken(TokenType.LEFT_CURLY_BRACKET, "{"),
+                SimplifiedToken(TokenType.LEFT_BRACKET, "("),
+                SimplifiedToken(TokenType.RIGHT_BRACKET, ")"),
+                SimplifiedToken(TokenType.RIGHT_CURLY_BRACKET, "}"),
+                SimplifiedToken(TokenType.RIGHT_SQUARE_BRACKET, "]"),
             ],
             expected_ast=None,
         ),
@@ -346,9 +351,9 @@ test_cases = {
             +1;
             """,
             expected_tokens=[
-                Token(TokenType.PLUS, "+", -1),
-                Token(TokenType.INTEGER, "1", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.PLUS, "+"),
+                SimplifiedToken(TokenType.INTEGER, "1"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=[
                 ["+", "1"],
@@ -359,9 +364,9 @@ test_cases = {
             -1;
             """,
             expected_tokens=[
-                Token(TokenType.MINUS, "-", -1),
-                Token(TokenType.INTEGER, "1", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.MINUS, "-"),
+                SimplifiedToken(TokenType.INTEGER, "1"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=[["-", "1"]],
         ),
@@ -370,10 +375,10 @@ test_cases = {
             "A string" + "Another string";
             """,
             expected_tokens=[
-                Token(TokenType.STRING, "A string", -1),
-                Token(TokenType.PLUS, "+", -1),
-                Token(TokenType.STRING, "Another string", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.STRING, "A string"),
+                SimplifiedToken(TokenType.PLUS, "+"),
+                SimplifiedToken(TokenType.STRING, "Another string"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=[
                 ["+", '"A string"', '"Another string"'],
@@ -384,12 +389,12 @@ test_cases = {
             -5--1;
             """,
             expected_tokens=[
-                Token(TokenType.MINUS, "-", -1),
-                Token(TokenType.INTEGER, "5", -1),
-                Token(TokenType.MINUS, "-", -1),
-                Token(TokenType.MINUS, "-", -1),
-                Token(TokenType.INTEGER, "1", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.MINUS, "-"),
+                SimplifiedToken(TokenType.INTEGER, "5"),
+                SimplifiedToken(TokenType.MINUS, "-"),
+                SimplifiedToken(TokenType.MINUS, "-"),
+                SimplifiedToken(TokenType.INTEGER, "1"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=[
                 ["-", ["-", "5"], ["-", "1"]],
@@ -400,16 +405,16 @@ test_cases = {
             1 + 2 * 3 - 4 / 5;
             """,
             expected_tokens=[
-                Token(TokenType.INTEGER, "1", -1),
-                Token(TokenType.PLUS, "+", -1),
-                Token(TokenType.INTEGER, "2", -1),
-                Token(TokenType.STAR, "*", -1),
-                Token(TokenType.INTEGER, "3", -1),
-                Token(TokenType.MINUS, "-", -1),
-                Token(TokenType.INTEGER, "4", -1),
-                Token(TokenType.SLASH, "/", -1),
-                Token(TokenType.INTEGER, "5", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.INTEGER, "1"),
+                SimplifiedToken(TokenType.PLUS, "+"),
+                SimplifiedToken(TokenType.INTEGER, "2"),
+                SimplifiedToken(TokenType.STAR, "*"),
+                SimplifiedToken(TokenType.INTEGER, "3"),
+                SimplifiedToken(TokenType.MINUS, "-"),
+                SimplifiedToken(TokenType.INTEGER, "4"),
+                SimplifiedToken(TokenType.SLASH, "/"),
+                SimplifiedToken(TokenType.INTEGER, "5"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=[
                 ["-", ["+", "1", ["*", "2", "3"]], ["/", "4", "5"]],
@@ -420,12 +425,12 @@ test_cases = {
             true and false or true;
             """,
             expected_tokens=[
-                Token(TokenType.TRUE, "true", -1),
-                Token(TokenType.AND, "and", -1),
-                Token(TokenType.FALSE, "false", -1),
-                Token(TokenType.OR, "or", -1),
-                Token(TokenType.TRUE, "true", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.TRUE, "true"),
+                SimplifiedToken(TokenType.AND, "and"),
+                SimplifiedToken(TokenType.FALSE, "false"),
+                SimplifiedToken(TokenType.OR, "or"),
+                SimplifiedToken(TokenType.TRUE, "true"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=[["or", ["and", "true", "false"], "true"]],
         ),
@@ -435,19 +440,19 @@ test_cases = {
             -1*2+3/(4+5);
             """,
             expected_tokens=[
-                Token(TokenType.MINUS, "-", -1),
-                Token(TokenType.INTEGER, "1", -1),
-                Token(TokenType.STAR, "*", -1),
-                Token(TokenType.INTEGER, "2", -1),
-                Token(TokenType.PLUS, "+", -1),
-                Token(TokenType.INTEGER, "3", -1),
-                Token(TokenType.SLASH, "/", -1),
-                Token(TokenType.LEFT_BRACKET, "(", -1),
-                Token(TokenType.INTEGER, "4", -1),
-                Token(TokenType.PLUS, "+", -1),
-                Token(TokenType.INTEGER, "5", -1),
-                Token(TokenType.RIGHT_BRACKET, ")", -1),
-                Token(TokenType.SEMICOLON, ";", -1),
+                SimplifiedToken(TokenType.MINUS, "-"),
+                SimplifiedToken(TokenType.INTEGER, "1"),
+                SimplifiedToken(TokenType.STAR, "*"),
+                SimplifiedToken(TokenType.INTEGER, "2"),
+                SimplifiedToken(TokenType.PLUS, "+"),
+                SimplifiedToken(TokenType.INTEGER, "3"),
+                SimplifiedToken(TokenType.SLASH, "/"),
+                SimplifiedToken(TokenType.LEFT_BRACKET, "("),
+                SimplifiedToken(TokenType.INTEGER, "4"),
+                SimplifiedToken(TokenType.PLUS, "+"),
+                SimplifiedToken(TokenType.INTEGER, "5"),
+                SimplifiedToken(TokenType.RIGHT_BRACKET, ")"),
+                SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=[
                 ["+", ["*", ["-", "1"], "2"], ["/", "3", ["group", ["+", "4", "5"]]]]
