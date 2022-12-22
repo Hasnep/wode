@@ -1,19 +1,18 @@
-from dataclasses import dataclass
 from typing import List, Tuple
 
 from koda import Err, Ok, Result
 
 from wode.ast import BinaryExpression, Expression, LiteralExpression, UnaryExpression
 from wode.errors import WodeError, WodeErrorType
-from wode.token import Token
+from wode.token import EOFToken, Token
 from wode.token_type import TokenType
 
 
-@dataclass
 class ParserState:
-    _all_tokens: List[Token]
-    source: str
-    position: int = 0
+    def __init__(self, all_tokens: List[Token], source: str, position: int = 0) -> None:
+        self._all_tokens = all_tokens
+        self.position = position
+        self.source = source
 
     def chomp(self) -> Tuple[Token, "ParserState"]:
         try:
@@ -21,7 +20,7 @@ class ParserState:
                 self._all_tokens, self.source, self.position + 1
             )
         except IndexError:
-            return Token(TokenType.EOF, "", -1), ParserState(
+            return EOFToken(self.source), ParserState(
                 self._all_tokens, self.source, self.position + 1
             )
 

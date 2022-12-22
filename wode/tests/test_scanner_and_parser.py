@@ -4,7 +4,7 @@ import pytest
 
 from wode.ast_to_s_expression import convert_to_s_expression
 from wode.parser import Parser
-from wode.scanner import Scanner
+from wode.scanner import scan_all_tokens
 from wode.tests.conftest import WodeTestCase, test_cases_flattened
 from wode.token_type import TokenType
 
@@ -28,7 +28,7 @@ def test_scanner_and_parser(test_case_id: str, test_case: WodeTestCase):
     del test_case
 
     # Scan the source
-    tokens, scanner_errors = Scanner(source).scan()
+    tokens, scanner_errors = scan_all_tokens(source)
 
     # Extract the error types that were returned
     scanner_error_types = [e.error_type for e in scanner_errors]

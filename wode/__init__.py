@@ -4,38 +4,38 @@ import typer
 
 from wode.ast_to_s_expression import convert_to_s_expression
 from wode.parser import Parser
-from wode.scanner import Scanner
+from wode.scanner import scan_all_tokens
 
 cli = typer.Typer(add_completion=False)
 
 
 @cli.command()
 def main(source_file_path: Path = typer.Argument(None, dir_okay=False)):
-    # Read source from file
+    # Read the source code from the specified file
     with open(source_file_path, "r") as f:
         source = f.read()
 
     # Scan the source code into tokens
-    tokens, scanning_errors = Scanner(source).scan()
+    tokens, scanner_errors = scan_all_tokens(source)
 
-    # If there were any scanning errors, raise them
-    if len(scanning_errors) > 0:
-        for error in scanning_errors:
-            error_message = error.get_message()
-            print(error_message)
+    # If there were any scanning errors, show them and stop execution
+    if len(scanner_errors) > 0:
+        print("Scanning errors:")
+        for error in scanner_errors:
+            print(error.get_message())
+        return
 
-    else:
-        # Parse the tokens into an AST
-        expressions, errors = Parser(tokens, source).parse()
+    # Parse the tokens into an AST
+    expressions, parsing_errors = Parser(tokens, source).parse()
 
-        # If there were any parsing errors, raise them
-        if len(errors) > 0:
-            print("Parsing errors:")
-            for error in errors:
-                error_message = error.get_message()
-                print(error_message)
-        else:
-            print("Parsed AST:")
-            for expression in expressions:
-                s_expression = convert_to_s_expression(expression)
-                print(s_expression)
+    # If there were any parsing errors, show them and stop execution
+    if len(parsing_errors) > 0:
+        print("Parsing errors:")
+        for error in parsing_errors:
+            print(error.get_message())
+        return
+
+    print("Parsed AST:")
+    for expression in expressions:
+        s_expression = convert_to_s_expression(expression)
+        print(s_expression)

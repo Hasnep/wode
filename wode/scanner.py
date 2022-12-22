@@ -2,13 +2,16 @@ from typing import List, Tuple
 
 from koda import Err, Just, Maybe, Ok, Result, mapping_get, nothing
 
-from wode.constants import DIGITS, LETTERS
+from wode.constants import VALID_IDENTIFIER_CHARACTERS, VALID_IDENTIFIER_PREFIXES
 from wode.errors import WodeError, WodeErrorType
-from wode.token import Token
+from wode.token import EOFToken, Token
 from wode.token_type import TokenType
+from wode.utils import UnreachableError, is_digit, is_whitespace, safe_substring
 
-triple_character_token_mapping = {"...": TokenType.ELLIPSIS}
-double_character_token_mapping = {
+token_mapping = {
+    # Triple character tokens
+    "...": TokenType.ELLIPSIS,
+    # Double character tokens
     "->": TokenType.SINGLE_ARROW,
     "!=": TokenType.BANG_EQUAL,
     "<=": TokenType.LESS_EQUAL,
@@ -16,8 +19,7 @@ double_character_token_mapping = {
     "=>": TokenType.DOUBLE_ARROW,
     ">=": TokenType.GREATER_EQUAL,
     "|>": TokenType.PIPE,
-}
-single_character_token_mapping = {
+    # Single character tokens
     ",": TokenType.COMMA,
     ";": TokenType.SEMICOLON,
     ":": TokenType.COLON,
@@ -30,13 +32,13 @@ single_character_token_mapping = {
     "*": TokenType.STAR,
     "/": TokenType.SLASH,
     "+": TokenType.PLUS,
-    # Possibly double tokens
+    # Possibly double character tokens
     "-": TokenType.MINUS,
     "!": TokenType.BANG,
     "<": TokenType.LESS,
     "=": TokenType.EQUAL,
     ">": TokenType.GREATER,
-    # Possibly triple tokens
+    # Possibly triple character tokens
     ".": TokenType.DOT,
 }
 reserved_keywords = {
@@ -59,289 +61,398 @@ reserved_keywords = {
 }
 
 
-class Scanner:
-    def __init__(self, source: str) -> None:
+class ScannerState:
+    def __init__(self, source: str, position: int = 0) -> None:
         self.source = source
-        self.current_position: int = 0
-        self.tokens: List[Token] = []
+        self.position: int = position
 
-    def get_remaining_source(self) -> str:
-        return self.source[self.current_position :]
-
-    def is_at_end(self) -> bool:
-        return self.current_position == len(self.source)
-
-    def advance(self, by: int = 1) -> None:
-        self.current_position += by
-
-    def look_one(self) -> str:
-        return self.source[self.current_position]
-
-    def look_ahead(self) -> Maybe[str]:
+    def chomp(self, n: int = 1) -> Maybe[Tuple[str, "ScannerState"]]:
         try:
-            return Just(self.source[self.current_position + 1])
+            first_n_characters = safe_substring(
+                self.source, begin=self.position, length=n
+            )
         except IndexError:
             return nothing
+        new_position = self.position + n
+        return Just((first_n_characters, ScannerState(self.source, new_position)))
 
-    def scan_for_end_of_file_token(self) -> Maybe[Token]:
-        if not self.is_at_end():
+
+def scan_for_eof_token(state: ScannerState) -> Maybe[Tuple[Token, ScannerState]]:
+    match state.chomp():
+        case Just(_):
             return nothing
+        case _:
+            return Just((EOFToken(state.source), state))
 
-        return Just(Token(TokenType.EOF, "", self.current_position))
 
-    def scan_for_whitespace_token(self) -> Maybe[str]:
-        first_character = self.get_remaining_source()[:1]
-        if first_character not in [" ", "\t", "\n"]:
-            return nothing
+def scan_for_whitespace_token(state: ScannerState) -> Maybe[ScannerState]:
+    match state.chomp():
+        case Just((bite, new_state)):
+            pass
+        case _:
+            raise UnreachableError(
+                "Scanning for whitespace happens after scanning for an EOF token."
+            )  # pragma: no cover
 
-        return Just(first_character)
+    if is_whitespace(bite):
+        return Just(new_state)
+    else:
+        return nothing
 
-    def scan_for_comment_token(self) -> Maybe[Token]:
-        if self.look_one() != "#":
-            return nothing
 
-        comment = ""
-        while not self.is_at_end() and self.look_one() != "\n":
-            comment += self.look_one()
-            self.advance()
-        return Just(Token(TokenType.COMMENT, comment, self.current_position))
+def scan_for_comment_token(state: ScannerState) -> Maybe[ScannerState]:
+    # TODO: Make this function return a comment token
 
-    def scan_for_string_token(self) -> Result[Maybe[Token], WodeError]:
-        if self.look_one() != '"':
-            return Ok(nothing)
+    # Get the first character
+    match state.chomp():
+        case Just((bite, _)):
+            pass
+        case _:
+            raise UnreachableError(
+                "Scanning for a comment token happens after scanning for an EOF token."
+            )  # pragma: no cover
 
-        n_quotation_marks_seen = 0
-        string = ""
-        while n_quotation_marks_seen < 2:
-            if self.is_at_end():
-                return Err(
-                    WodeError(
-                        WodeErrorType.UnexpectedEndOfFileError,
-                        self.source,
-                        self.current_position - 1,
+    # If the first character is not a hash then we didn't find a comment
+    if bite != "#":
+        return nothing
+
+    # If we found a comment, keep consuming characters until the end of the line
+    while True:
+        match state.chomp():
+            case Just((bite, state)):
+                # The comment finishes at the end of the line
+                if bite == "\n":
+                    return Just(state)
+            # The comment also finishes when we reach the end of the file
+            case _:
+                return Just(state)
+
+
+def scan_for_string_token(
+    state: ScannerState,
+) -> Maybe[Tuple[Result[Token, WodeError], ScannerState]]:
+    # Get the first character
+    match state.chomp():
+        case Just((bite, state)):
+            pass
+        case _:
+            raise UnreachableError(
+                "Scanning for a string token happens after scanning for an EOF token."
+            )  # pragma: no cover
+
+    # If the first character isn't a quotation mark it's not a string
+    if bite != '"':
+        return nothing
+
+    start_of_string_position = state.position
+    while True:
+        match state.chomp():
+            case Just((bite, state)):
+                pass
+            case _:
+                return Just(
+                    (
+                        Err(
+                            WodeError(
+                                WodeErrorType.UnexpectedEndOfFileError,
+                                state.source,
+                                state.position - 1,
+                            )
+                        ),
+                        state,
                     )
                 )
-            if self.look_one() == '"':
-                n_quotation_marks_seen += 1
-            else:
-                string += self.look_one()
-            self.advance()
-        return Ok(Just(Token(TokenType.STRING, string, self.current_position)))
 
-    def scan_for_triple_character_token(self) -> Maybe[Token]:
-        lexeme = self.get_remaining_source()[:3]
-        maybe_token_type = mapping_get(triple_character_token_mapping, lexeme)
-        maybe_token = maybe_token_type.map(
-            lambda token_type: Token(token_type, lexeme, self.current_position)
-        )
-        return maybe_token
+        # Check if we found the closing quotation mark
+        if bite == '"':
+            end_of_string_position = state.position - 1
+            token_length = end_of_string_position - start_of_string_position
+            return Just(
+                (
+                    Ok(
+                        Token(
+                            TokenType.STRING,
+                            start_of_string_position,
+                            token_length,
+                            state.source,
+                        )
+                    ),
+                    state,
+                )
+            )
 
-    def scan_for_double_character_token(self) -> Maybe[Token]:
-        lexeme = self.get_remaining_source()[:2]
-        maybe_token_type = mapping_get(double_character_token_mapping, lexeme)
-        maybe_token = maybe_token_type.map(
-            lambda token_type: Token(token_type, lexeme, self.current_position)
-        )
-        return maybe_token
 
-    def scan_for_single_character_token(self) -> Maybe[Token]:
-        lexeme = self.get_remaining_source()[:1]
-        maybe_token_type = mapping_get(single_character_token_mapping, lexeme)
-        maybe_token = maybe_token_type.map(
-            lambda token_type: Token(token_type, lexeme, self.current_position)
-        )
-        return maybe_token
+def scan_for_n_character_token(
+    state: ScannerState, n_characters: int
+) -> Maybe[Tuple[Token, ScannerState]]:
+    # Check if we've reached the end of the file
+    match state.chomp():
+        case Just((_, _)):
+            pass
+        case _:
+            raise UnreachableError(
+                f"Scanning for a {n_characters} character token happens after scanning for an EOF token."
+            )  # pragma: no cover
 
-    def scan_for_number_token(self) -> Result[Maybe[Token], WodeError]:
-        def is_digit(c: str) -> bool:
-            return c in DIGITS
+    # Get the next n characters
+    match state.chomp(n_characters):
+        case Just((bite, new_state)):
+            pass
+        case _:
+            # If we reach the end of the file now it means the token is less than n characters
+            return nothing
 
-        c = self.look_one()
-        if not is_digit(c):
-            if c == ".":
-                self.advance()
-                return Err(
+    maybe_token_type = mapping_get(token_mapping, bite)
+    maybe_token = maybe_token_type.map(
+        lambda token_type: Token(token_type, state.position, n_characters, state.source)
+    )
+    return maybe_token.map(lambda token: (token, new_state))
+
+
+def scan_for_number_token(
+    state: ScannerState,
+) -> Maybe[Tuple[Result[Token, WodeError], ScannerState]]:
+    # Get the first character
+    match state.chomp():
+        case Just((bite, new_state)):
+            pass
+        case _:
+            raise UnreachableError(
+                "Scanning for a number token happens after scanning for an EOF token."
+            )  # pragma: no cover
+
+    # If the first character is a decimal point, the number has no leading zero
+    if bite == ".":
+        state = new_state
+        while True:
+            match state.chomp():
+                case Just((bite, new_state)):
+                    if is_digit(bite):
+                        pass
+                    else:
+                        break
+                case _:
+                    break
+            state = new_state
+        return Just(
+            (
+                Err(
                     WodeError(
                         WodeErrorType.NoLeadingZeroOnFloatError,
-                        self.source,
-                        self.current_position,
+                        state.source,
+                        state.position,
                     )
-                )
-            else:
-                return Ok(nothing)
-
-        number = ""
-        while True:
-            c = self.look_one()
-            if is_digit(c):
-                number += c
-                self.advance()
-            else:
-                if c == ".":
-                    maybe_next_c = self.look_ahead()
-                    match maybe_next_c:
-                        case Just(next_c):
-                            if is_digit(next_c):
-                                number += c
-                                self.advance()
-                                while True:
-                                    c = self.look_one()
-                                    if is_digit(c):
-                                        number += c
-                                        self.advance()
-                                    else:
-                                        return Ok(
-                                            Just(
-                                                Token(
-                                                    TokenType.FLOAT,
-                                                    number,
-                                                    self.current_position,
-                                                )
-                                            )
-                                        )
-                            else:
-                                self.advance()
-                                return Err(
-                                    WodeError(
-                                        WodeErrorType.UnterminatedFloatError,
-                                        self.source,
-                                        self.current_position,
-                                    )
-                                )
-                        case _:
-                            return Err(
-                                WodeError(
-                                    WodeErrorType.UnexpectedEndOfFileError,
-                                    self.source,
-                                    self.current_position,
-                                )
-                            )
-                else:
-                    return Ok(
-                        Just(Token(TokenType.INTEGER, number, self.current_position))
-                    )
-
-    def scan_for_identifier_token(self) -> Maybe[Token]:
-        valid_identifier_prefixes = ["_"] + LETTERS
-        valid_identifier_characters = ["_"] + LETTERS + DIGITS
-        c = self.look_one()
-        if c not in valid_identifier_prefixes:
-            return nothing
-
-        identifier = ""
-
-        while True:
-            c = self.look_one()
-            if c in valid_identifier_characters:
-                identifier += c
-                self.advance()
-            else:
-                break
-
-        if identifier in reserved_keywords.keys():
-            return Just(
-                Token(
-                    TokenType(reserved_keywords[identifier]),
-                    identifier,
-                    self.current_position,
-                )
-            )
-        else:
-            return Just(Token(TokenType.IDENTIFIER, identifier, self.current_position))
-
-    def scan_once(self) -> Result[Maybe[Token], WodeError]:
-        match self.scan_for_end_of_file_token():
-            case Just(end_of_file_token):
-                return Ok(Just(end_of_file_token))
-            case _:
-                pass
-
-        match self.scan_for_whitespace_token():
-            case Just(_):
-                self.advance()
-                return Ok(nothing)
-            case _:
-                pass
-
-        match self.scan_for_comment_token():
-            case Just(_):
-                # TODO: Add parsing for comments
-                # return Ok(Just(comment_token))
-                return Ok(nothing)
-            case _:
-                pass
-
-        match self.scan_for_string_token():
-            case Ok(maybe_string_token):
-                match maybe_string_token:
-                    case Just(string_token):
-                        return Ok(Just(string_token))
-                    case _:
-                        pass
-            case err:
-                return err
-
-        maybe_triple_character_token = self.scan_for_triple_character_token()
-        match maybe_triple_character_token:
-            case Just(triple_character_token):
-                self.advance(3)
-                return Ok(Just(triple_character_token))
-            case _:
-                pass
-
-        maybe_double_character_token = self.scan_for_double_character_token()
-        match maybe_double_character_token:
-            case Just(double_character_token):
-                self.advance(2)
-                return Ok(Just(double_character_token))
-            case _:
-                pass
-
-        match self.scan_for_number_token():
-            case Ok(maybe_number_token):
-                match maybe_number_token:
-                    case Just(number_token):
-                        return Ok(Just(number_token))
-                    case _:
-                        pass
-            case err:
-                return err
-
-        # Must go after number token so we don't accidentally parse the dot in .123
-        maybe_single_character_token = self.scan_for_single_character_token()
-        match maybe_single_character_token:
-            case Just(single_character_token):
-                self.advance()
-                return Ok(Just(single_character_token))
-            case _:
-                pass
-
-        maybe_identifier_token = self.scan_for_identifier_token()
-        match maybe_identifier_token:
-            case Just(identifier_token):
-                return Ok(Just(identifier_token))
-            case _:
-                pass
-
-        err = Err(
-            WodeError(
-                WodeErrorType.UnknownCharacterError, self.source, self.current_position
+                ),
+                new_state,
             )
         )
-        self.advance()
-        return err
+    elif is_digit(bite):
+        pass
+    else:
+        return nothing
 
-    def scan(self) -> Tuple[List[Token], List[WodeError]]:
-        errors: List[WodeError] = []
+    start_of_number_position = state.position
+    found_a_decimal_point = False
+    while True:
+        match state.chomp():
+            case Just((".", new_state)):
+                # When we find a decimal point, start parsing the fractional part
+                found_a_decimal_point = True
+                state = new_state
+                break
+            case Just((bite, new_state)):
+                if is_digit(bite):
+                    pass
+                else:
+                    # If the character isn't a number or a decimal then the number has ended
+                    break
+            case _:
+                # If we reach the end of the file then the number has ended
+                break
+        state = new_state
+
+    # Check if we need to parse the fractional part
+    if found_a_decimal_point:
+        found_a_fractional_part = False
         while True:
-            match self.scan_once():
-                case Ok(maybe_token):
-                    match maybe_token:
-                        case Just(token):
-                            self.tokens.append(token)
-                            if token.token_type == TokenType.EOF:
-                                return self.tokens, errors
-                        case _:
-                            pass
-                case Err(error):
-                    errors.append(error)
+            match state.chomp():
+                case Just((".", new_state)):
+                    # If we find another decimal point, return an error
+                    while True:
+                        match state.chomp():
+                            case Just((bite, new_state)):
+                                if is_digit(bite) or bite == ".":
+                                    state = new_state
+                                else:
+                                    break
+                            case _:
+                                break
+                    too_many_decimal_points_error = WodeError(
+                        WodeErrorType.TooManyDecimalPointsError,
+                        state.source,
+                        state.position,
+                    )
+                    return Just((Err(too_many_decimal_points_error), state))
+                case Just((bite, new_state)):
+                    if is_digit(bite):
+                        found_a_fractional_part = True
+                    else:
+                        # If the character isn't a number or a decimal then the number has ended
+                        break
+                case _:
+                    # If we reach the end of the file then the number has ended
+                    break
+            state = new_state
+        if not found_a_fractional_part:
+            return Just(
+                (
+                    Err(
+                        WodeError(
+                            WodeErrorType.UnterminatedFloatError,
+                            state.source,
+                            state.position,
+                        )
+                    ),
+                    state,
+                )
+            )
+
+    # Return the number token
+    token_length = state.position - start_of_number_position
+    if found_a_decimal_point:
+        token_type = TokenType.FLOAT
+    else:
+        token_type = TokenType.INTEGER
+
+    token = Token(token_type, start_of_number_position, token_length, state.source)
+    return Just((Ok(token), state))
+
+
+def scan_for_identifier_token(state: ScannerState) -> Maybe[Tuple[Token, ScannerState]]:
+    # Get the first character
+    match state.chomp():
+        case Just((bite, _)):
+            pass
+        case _:
+            raise UnreachableError(
+                "Scanning for an identifier token happens after scanning for an EOF token."
+            )  # pragma: no cover
+
+    # Make sure the identifier starts with a valid character
+    if bite not in VALID_IDENTIFIER_PREFIXES:
+        return nothing
+
+    start_of_identifier_position = state.position
+    while True:
+        match state.chomp():
+            case Just((bite, new_state)):
+                if bite in VALID_IDENTIFIER_CHARACTERS:
+                    pass
+                else:
+                    break
+            case _:
+                # If we reached the end of the file the identifier has ended
+                break
+        state = new_state
+
+    # Return the identifier token
+    end_of_identifier_position = state.position
+    identifier = safe_substring(
+        state.source,
+        begin=start_of_identifier_position,
+        end=end_of_identifier_position,
+    )
+    token = Token(
+        reserved_keywords.get(identifier, TokenType.IDENTIFIER),
+        start_of_identifier_position,
+        len(identifier),
+        state.source,
+    )
+    return Just((token, state))
+
+
+def scan_one_token(
+    state: ScannerState,
+) -> Tuple[Result[Maybe[Token], WodeError], ScannerState]:
+    match scan_for_eof_token(state):
+        case Just((token, state)):
+            return Ok(Just(token)), state
+        case _:
+            pass
+
+    match scan_for_whitespace_token(state):
+        case Just(new_state):
+            return Ok(nothing), new_state
+        case _:
+            pass
+
+    match scan_for_comment_token(state):
+        case Just(new_state):
+            return Ok(nothing), new_state
+        case _:
+            pass
+
+    match scan_for_string_token(state):
+        case Just((Ok(token), state)):
+            return Ok(Just(token)), state
+        case Just((Err(wode_error), state)):
+            return Err(wode_error), state
+        case _:
+            pass
+
+    match scan_for_n_character_token(state, 3):
+        case Just((token, state)):
+            return Ok(Just(token)), state
+        case _:
+            pass
+
+    match scan_for_n_character_token(state, 2):
+        case Just((token, state)):
+            return Ok(Just(token)), state
+        case _:
+            pass
+
+    match scan_for_number_token(state):
+        case Just((Ok(token), state)):
+            return Ok(Just(token)), state
+        case Just((Err(wode_error), state)):
+            return Err(wode_error), state
+        case _:
+            pass
+
+    # Must go after number token so we don't accidentally parse the dot in .123
+    match scan_for_n_character_token(state, 1):
+        case Just((token, state)):
+            return Ok(Just(token)), state
+        case _:
+            pass
+
+    match scan_for_identifier_token(state):
+        case Just((token, state)):
+            return Ok(Just(token)), state
+        case _:
+            pass
+
+    raise ValueError(
+        WodeError(WodeErrorType.UnknownCharacterError, state.source, state.position)
+    )
+
+
+def scan_all_tokens(source: str) -> Tuple[List[Token], List[WodeError]]:
+    tokens: List[Token] = []
+    errors: List[WodeError] = []
+    state = ScannerState(source)
+    while True:
+        match scan_one_token(state):
+            case (Ok(Just(token)), new_state):
+                tokens.append(token)
+                state = new_state
+                if token.token_type == TokenType.EOF:
+                    return tokens, errors
+            case (Err(wode_error), new_state):
+                errors.append(wode_error)
+                state = new_state
+                # if wode_error.error_type==WodeErrorType.UnexpectedEndOfFileError:
+                #     return tokens,errors
+            case (_, new_state):
+                state = new_state
