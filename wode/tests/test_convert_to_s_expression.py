@@ -15,30 +15,30 @@ from wode.token_type import TokenType
 @pytest.mark.parametrize(
     ",".join(["expression", "expected_s_expression"]),
     [
-        (LiteralExpression(Token(TokenType.INTEGER, "123", -1)), "123"),
-        (LiteralExpression(Token(TokenType.FLOAT, "456.789", -1)), "456.789"),
+        (LiteralExpression(Token(TokenType.INTEGER, 0, 3, "123")), "123"),
+        (LiteralExpression(Token(TokenType.FLOAT, 0, 7, "456.789")), "456.789"),
         (
             GroupingExpression(
-                LiteralExpression(Token(TokenType.FLOAT, "456.789", -1))
+                LiteralExpression(Token(TokenType.FLOAT, 1, 7, "(456.789)"))
             ),
             ["group", "456.789"],
         ),
         (
             UnaryExpression(
-                Token(TokenType.MINUS, "-", -1),
-                LiteralExpression(Token(TokenType.INTEGER, "123", -1)),
+                Token(TokenType.MINUS, 0, 1, "-123"),
+                LiteralExpression(Token(TokenType.INTEGER, 1, 3, "-123")),
             ),
             ["-", "123"],
         ),
         (
             BinaryExpression(
                 UnaryExpression(
-                    Token(TokenType.MINUS, "-", -1),
-                    LiteralExpression(Token(TokenType.INTEGER, "123", -1)),
+                    Token(TokenType.MINUS, 0, 1, "-123*(456.789)"),
+                    LiteralExpression(Token(TokenType.INTEGER, 1, 3, "-123*(456.789)")),
                 ),
-                Token(TokenType.STAR, "*", -1),
+                Token(TokenType.STAR, 4, 1, "-123*(456.789)"),
                 GroupingExpression(
-                    LiteralExpression(Token(TokenType.FLOAT, "456.789", -1))
+                    LiteralExpression(Token(TokenType.FLOAT, 6, 7, "-123*(456.789)"))
                 ),
             ),
             ["*", ["-", "123"], ["group", "456.789"]],

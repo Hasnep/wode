@@ -9,8 +9,9 @@ class WodeErrorType(Enum):
     UnterminatedFloatError = "unterminated_float_error"
     NoLeadingZeroOnFloatError = "no_leading_zero_on_float_error"
     UnexpectedEndOfExpressionError = "unexpected_end_of_expression_error"
-    UnexpectedTokenType = "UnexpectedTokenType"
-    ExpectedSemicolonError = "ExpectedSemicolonError"
+    UnexpectedTokenType = "unexpected_token_type"
+    ExpectedSemicolonError = "expected_semicolon_error"
+    TooManyDecimalPointsError = "too_many_decimal_points_error"
 
 
 class WodeError:

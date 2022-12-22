@@ -7,7 +7,7 @@ def get_lines(source: str) -> List[str]:
 
 
 def get_line(source: str, line_number: int) -> str:
-    return source.splitlines()[line_number - 1]
+    return get_lines(source)[line_number - 1]
 
 
 def get_line_number_of_position(source: str, position: int) -> int:
