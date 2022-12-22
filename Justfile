@@ -36,4 +36,4 @@ coverage:
     poetry run python -m http.server --directory=htmlcov
 
 example:
-    poetry run python -m wode ./example.wode
+    poetry run python -m wode run example.wode
