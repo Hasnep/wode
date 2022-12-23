@@ -1,4 +1,4 @@
-from typing import Generator, List, Optional, TypeVar
+from typing import List, Optional, TypeVar
 
 from wode.constants import DIGITS, LETTERS, WHITESPACE_CHARACTERS
 
@@ -23,15 +23,15 @@ def safe_slice(
     begin: int,
     length: Optional[int] = None,
     end: Optional[int] = None,
-) -> Generator[T, None, None]:
+) -> List[T]:
     """Slice an iterator and raise an IndexError if you try to access an out of bounds index."""
     match (length, end):
         case (None, None):
             raise ValueError("One of `length` or `end` must be specified.")
         case (None, end):
-            return (iterator[i] for i in range(begin, end))  # type: ignore
+            return [iterator[i] for i in range(begin, end)]  # type: ignore
         case (length, None):
-            return (iterator[i] for i in range(begin, begin + length))  # type: ignore
+            return [iterator[i] for i in range(begin, begin + length)]  # type: ignore
         case (length, end):
             raise ValueError("One of `length` or `end` must be specified.")
 
