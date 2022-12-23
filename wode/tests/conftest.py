@@ -422,17 +422,17 @@ test_cases = {
         ),
         "boolean operator precedence": WodeTestCase(
             source="""
-            true and false or true;
+            true && false || true;
             """,
             expected_tokens=[
                 SimplifiedToken(TokenType.TRUE, "true"),
-                SimplifiedToken(TokenType.AND, "and"),
+                SimplifiedToken(TokenType.AMPERSAND_AMPERSAND, "&&"),
                 SimplifiedToken(TokenType.FALSE, "false"),
-                SimplifiedToken(TokenType.OR, "or"),
+                SimplifiedToken(TokenType.BAR_BAR, "||"),
                 SimplifiedToken(TokenType.TRUE, "true"),
                 SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
-            expected_ast=[["or", ["and", "true", "false"], "true"]],
+            expected_ast=[["||", ["&&", "true", "false"], "true"]],
         ),
         "operator precedence with brackets": WodeTestCase(
             broken=True,

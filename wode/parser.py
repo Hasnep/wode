@@ -37,8 +37,8 @@ def get_infix_binding_power(operator: TokenType) -> Tuple[float, float]:
         TokenType.SLASH: (8, 8.1),
         TokenType.PLUS: (7, 7.1),
         TokenType.MINUS: (7, 7.1),
-        TokenType.AND: (6.1, 6),
-        TokenType.OR: (5.1, 5),
+        TokenType.AMPERSAND_AMPERSAND: (6.1, 6),
+        TokenType.BAR_BAR: (5.1, 5),
     }
     try:
         return operator_binding_power_mapping[operator]
@@ -123,8 +123,8 @@ def parse_expression(
                 | TokenType.MINUS
                 | TokenType.STAR
                 | TokenType.SLASH
-                | TokenType.AND
-                | TokenType.OR
+                | TokenType.AMPERSAND_AMPERSAND
+                | TokenType.BAR_BAR
             ):
                 # Don't consume the token yet, we don't know its binding power yet
                 operator = token

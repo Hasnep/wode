@@ -19,6 +19,8 @@ token_mapping = {
     "=>": TokenType.DOUBLE_ARROW,
     ">=": TokenType.GREATER_EQUAL,
     "|>": TokenType.PIPE,
+    "&&": TokenType.AMPERSAND_AMPERSAND,
+    "||": TokenType.BAR_BAR,
     # Single character tokens
     ",": TokenType.COMMA,
     ";": TokenType.SEMICOLON,
@@ -42,7 +44,6 @@ token_mapping = {
     ".": TokenType.DOT,
 }
 reserved_keywords = {
-    "and": TokenType.AND,
     "elif": TokenType.ELIF,
     "else": TokenType.ELSE,
     "false": TokenType.FALSE,
@@ -52,7 +53,6 @@ reserved_keywords = {
     "let": TokenType.LET,
     "match": TokenType.MATCH,
     "nothing": TokenType.NOTHING,
-    "or": TokenType.OR,
     "return": TokenType.RETURN,
     "struct": TokenType.STRUCT,
     "true": TokenType.TRUE,

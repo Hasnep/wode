@@ -16,7 +16,9 @@ class TokenType(Enum):
     SLASH = "slash"
     STAR = "star"
     # Multi-character tokens
+    AMPERSAND_AMPERSAND = "ampersand_ampersand"
     BANG = "bang"
+    BAR_BAR = "bar_bar"
     DOUBLE_ARROW = "double_arrow"
     ELLIPSIS = "ellipsis"
     EQUAL_EQUAL = "equal_equal"
@@ -37,7 +39,6 @@ class TokenType(Enum):
     INTEGER = "integer"
     STRING = "string"
     # Keywords
-    AND = "and"
     ELIF = "elif"
     ELSE = "else"
     FALSE = "false"
@@ -47,7 +48,6 @@ class TokenType(Enum):
     LET = "let"
     MATCH = "match"
     NOTHING = "nothing"
-    OR = "or"
     RETURN = "return"
     STRUCT = "struct"
     TRUE = "true"
