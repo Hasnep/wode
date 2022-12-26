@@ -3,6 +3,7 @@ from typing import List, Tuple
 from koda import Err, Ok, Result
 
 from wode.ast import BinaryExpression, Expression, LiteralExpression, UnaryExpression
+from wode.binding_power import get_infix_binding_power, get_prefix_binding_power
 from wode.errors import (
     ExpectedSemicolonError,
     UnexpectedEndOfExpressionError,
@@ -34,33 +35,6 @@ class ParserState:
             print(
                 f"{i} {token.token_type}: {token.lexeme}{' <--' if i == self.position else ''}"
             )
-
-
-def get_infix_binding_power(operator: TokenType) -> Tuple[float, float]:
-    operator_binding_power_mapping = {
-        TokenType.STAR: (8, 8.1),
-        TokenType.SLASH: (8, 8.1),
-        TokenType.PLUS: (7, 7.1),
-        TokenType.MINUS: (7, 7.1),
-        TokenType.AMPERSAND_AMPERSAND: (6.1, 6),
-        TokenType.BAR_BAR: (5.1, 5),
-    }
-    try:
-        return operator_binding_power_mapping[operator]
-    except KeyError as err:
-        raise KeyError(
-            f"Couldn't find infix binding power for infix operator `{operator}`."
-        ) from err
-
-
-def get_prefix_binding_power(operator: TokenType) -> Tuple[None, float]:
-    match operator:
-        case TokenType.PLUS | TokenType.MINUS:
-            return (None, 7.1)
-        case TokenType.BANG:
-            return (None, 5.1)
-        case _:
-            raise ValueError(f"Unknown binding power for prefix operator `{operator}`.")
 
 
 def parse_expression(
