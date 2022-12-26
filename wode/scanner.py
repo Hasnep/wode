@@ -3,7 +3,14 @@ from typing import List, Tuple
 from koda import Err, Just, Maybe, Ok, Result, mapping_get, nothing
 
 from wode.constants import VALID_IDENTIFIER_CHARACTERS, VALID_IDENTIFIER_PREFIXES
-from wode.errors import WodeError, WodeErrorType
+from wode.errors import (
+    NoLeadingZeroOnFloatError,
+    TooManyDecimalPointsError,
+    UnexpectedEndOfFileError,
+    UnknownCharacterError,
+    UnterminatedFloatError,
+    WodeError,
+)
 from wode.token import EOFToken, Token
 from wode.token_type import TokenType
 from wode.utils import UnreachableError, is_digit, is_whitespace, safe_substring
@@ -150,36 +157,22 @@ def scan_for_string_token(
             case Just((bite, state)):
                 pass
             case _:
-                return Just(
-                    (
-                        Err(
-                            WodeError(
-                                WodeErrorType.UnexpectedEndOfFileError,
-                                state.source,
-                                state.position - 1,
-                            )
-                        ),
-                        state,
-                    )
+                unexpected_end_of_file_error = UnexpectedEndOfFileError(
+                    state.source, state.position - 1
                 )
+                return Just((Err(unexpected_end_of_file_error), state))
 
         # Check if we found the closing quotation mark
         if bite == '"':
             end_of_string_position = state.position - 1
             token_length = end_of_string_position - start_of_string_position
-            return Just(
-                (
-                    Ok(
-                        Token(
-                            TokenType.STRING,
-                            start_of_string_position,
-                            token_length,
-                            state.source,
-                        )
-                    ),
-                    state,
-                )
+            string_token = Token(
+                TokenType.STRING,
+                start_of_string_position,
+                token_length,
+                state.source,
             )
+            return Just((Ok(string_token), state))
 
 
 def scan_for_n_character_token(
@@ -212,6 +205,8 @@ def scan_for_n_character_token(
 def scan_for_number_token(
     state: ScannerState,
 ) -> Maybe[Tuple[Result[Token, WodeError], ScannerState]]:
+    start_of_number_position = state.position
+
     # Get the first character
     match state.chomp():
         case Just((bite, new_state)):
@@ -234,24 +229,20 @@ def scan_for_number_token(
                 case _:
                     break
             state = new_state
-        return Just(
-            (
-                Err(
-                    WodeError(
-                        WodeErrorType.NoLeadingZeroOnFloatError,
-                        state.source,
-                        state.position,
-                    )
-                ),
-                new_state,
-            )
+        float_without_leading_zero = safe_substring(
+            state.source, begin=start_of_number_position, end=state.position
         )
+        no_leading_zero_on_float_error = NoLeadingZeroOnFloatError(
+            state.source,
+            state.position,
+            float_without_leading_zero=float_without_leading_zero,
+        )
+        return Just((Err(no_leading_zero_on_float_error), new_state))
     elif is_digit(bite):
         pass
     else:
         return nothing
 
-    start_of_number_position = state.position
     found_a_decimal_point = False
     while True:
         match state.chomp():
@@ -287,10 +278,13 @@ def scan_for_number_token(
                                     break
                             case _:
                                 break
-                    too_many_decimal_points_error = WodeError(
-                        WodeErrorType.TooManyDecimalPointsError,
+                    float_with_too_many_decimal_points = safe_substring(
+                        state.source, begin=start_of_number_position, end=state.position
+                    )
+                    too_many_decimal_points_error = TooManyDecimalPointsError(
                         state.source,
                         state.position,
+                        float_with_too_many_decimal_points=float_with_too_many_decimal_points,
                     )
                     return Just((Err(too_many_decimal_points_error), state))
                 case Just((bite, new_state)):
@@ -304,18 +298,17 @@ def scan_for_number_token(
                     break
             state = new_state
         if not found_a_fractional_part:
-            return Just(
-                (
-                    Err(
-                        WodeError(
-                            WodeErrorType.UnterminatedFloatError,
-                            state.source,
-                            state.position,
-                        )
-                    ),
-                    state,
-                )
+            unterminated_float = safe_substring(
+                state.source,
+                begin=start_of_number_position,
+                end=state.position,
             )
+            unterminated_float_error = UnterminatedFloatError(
+                state.source,
+                state.position,
+                unterminated_float=unterminated_float,
+            )
+            return Just((Err(unterminated_float_error), state))
 
     # Return the number token
     token_length = state.position - start_of_number_position
@@ -433,9 +426,16 @@ def scan_one_token(
         case _:
             pass
 
-    raise ValueError(
-        WodeError(WodeErrorType.UnknownCharacterError, state.source, state.position)
-    )
+    match state.chomp():
+        case Just((bite, new_state)):
+            unknown_character_error = UnknownCharacterError(
+                state.source, state.position, unknown_character=bite
+            )
+            return (Err(unknown_character_error), new_state)
+        case _:
+            raise UnreachableError(
+                "Reaching an unknown character error happens after scanning for an EOF token."
+            )
 
 
 def scan_all_tokens(source: str) -> Tuple[List[Token], List[WodeError]]:

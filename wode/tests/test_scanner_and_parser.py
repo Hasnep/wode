@@ -21,9 +21,6 @@ def test_scanner_and_parser(test_case_id: str, test_case: WodeTestCase):
     source = test_case.source
     expected_tokens = test_case.expected_tokens
     expected_scanner_error_types = test_case.expected_scanner_error_types
-    expected_scanner_error_types_strings = [
-        str(error_type) for error_type in expected_scanner_error_types
-    ]
     expected_ast = test_case.expected_ast
     del test_case
 
@@ -31,16 +28,14 @@ def test_scanner_and_parser(test_case_id: str, test_case: WodeTestCase):
     tokens, scanner_errors = scan_all_tokens(source)
 
     # Extract the error types that were returned
-    scanner_error_types = [e.error_type for e in scanner_errors]
-    scanner_error_types_strings = [
-        str(error_type) for error_type in scanner_error_types
-    ]
+    scanner_error_types = [type(e) for e in scanner_errors]
 
     if len(expected_scanner_error_types) == 0:
-        assert len(scanner_error_types) == 0, "\n".join(
-            f"Test case `{test_case_id}` unexpectedly raised scanner error types:"
-            + ", ".join(scanner_error_types_strings)
+        assert len(scanner_error_types) == 0, (
+            f"Test case `{test_case_id}` unexpectedly raised scanner error types: "
+            + ", ".join([str(e) for e in scanner_error_types])
         )
+
         # Test the tokens were scanned as expected
         tokens_simplified = [(token.token_type, token.lexeme) for token in tokens]
         expected_tokens_simplified = [
@@ -54,9 +49,9 @@ def test_scanner_and_parser(test_case_id: str, test_case: WodeTestCase):
         assert scanner_error_types == expected_scanner_error_types, dedent(
             f"""
             Expected test case `{test_case_id}` to return errors:
-            {', '.join(expected_scanner_error_types_strings)}
+            {', '.join([str(e) for e in expected_scanner_error_types])}
             but it returned:
-            {', '.join(scanner_error_types_strings)}
+            {', '.join([str(e) for e in  scanner_error_types])}
             """
         )
 
@@ -73,7 +68,7 @@ def test_scanner_and_parser(test_case_id: str, test_case: WodeTestCase):
     # If there were any parser errors, raise them
     assert len(parser_errors) == 0, "\n".join(
         [f"Parsing errors found in test case `{test_case_id}`:"]
-        + [str(error.error_type) for error in parser_errors]
+        + [error.get_message() for error in parser_errors]
     )
 
     # Check the parser works as expected

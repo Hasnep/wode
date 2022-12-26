@@ -1,10 +1,17 @@
 from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
-from typing import List, Optional
+from typing import List, Optional, Type
 
 from wode.ast_to_s_expression import SExpression
-from wode.errors import WodeErrorType
+from wode.errors import (
+    NoLeadingZeroOnFloatError,
+    TooManyDecimalPointsError,
+    UnexpectedEndOfFileError,
+    UnknownCharacterError,
+    UnterminatedFloatError,
+    WodeError,
+)
 from wode.token_type import TokenType
 
 DATA_FOLDER = Path(".") / "data"
@@ -21,7 +28,7 @@ class WodeTestCase:
         self,
         source: str,
         expected_tokens: List[SimplifiedToken] = [],
-        expected_scanner_error_types: List[WodeErrorType] = [],
+        expected_scanner_error_types: List[Type[WodeError]] = [],
         expected_ast: Optional[List[SExpression]] = None,
         broken: bool = False,
     ) -> None:
@@ -35,7 +42,7 @@ class WodeTestCase:
                     expected_scanner_error_types: {expected_scanner_error_types}
                     """
                 )
-            )
+            )  # pragma: no cover
         self.source = dedent(source)
         self.expected_tokens = expected_tokens
         self.expected_scanner_error_types = expected_scanner_error_types
@@ -96,7 +103,7 @@ test_cases = {
             .456;
             """,
             expected_scanner_error_types=[
-                WodeErrorType.NoLeadingZeroOnFloatError,
+                NoLeadingZeroOnFloatError,
             ],
         ),
         "unterminated float": WodeTestCase(
@@ -104,7 +111,7 @@ test_cases = {
             123.;
             """,
             expected_scanner_error_types=[
-                WodeErrorType.UnterminatedFloatError,
+                UnterminatedFloatError,
             ],
         ),
         "too many decimal points": WodeTestCase(
@@ -112,7 +119,7 @@ test_cases = {
             123.456.789;
             """,
             expected_scanner_error_types=[
-                WodeErrorType.TooManyDecimalPointsError,
+                TooManyDecimalPointsError,
             ],
         ),
     },
@@ -163,7 +170,9 @@ test_cases = {
             source="""
             "This is an un-terminated string
             """,
-            expected_scanner_error_types=[WodeErrorType.UnexpectedEndOfFileError],
+            expected_scanner_error_types=[
+                UnexpectedEndOfFileError,
+            ],
             expected_ast=None,
         ),
         "a multiline string": WodeTestCase(
@@ -182,7 +191,9 @@ test_cases = {
             "This is an
             un-terminated multiline-string
             """,
-            expected_scanner_error_types=[WodeErrorType.UnexpectedEndOfFileError],
+            expected_scanner_error_types=[
+                UnexpectedEndOfFileError,
+            ],
             expected_ast=None,
         ),
     },
@@ -458,6 +469,17 @@ test_cases = {
                 ["+", ["*", ["-", "1"], "2"], ["/", "3", ["group", ["+", "4", "5"]]]]
             ],
         ),
+    },
+    "erroring": {
+        "an emoji": WodeTestCase(
+            broken=False,
+            source="""
+            😅;
+            """,
+            expected_scanner_error_types=[
+                UnknownCharacterError,
+            ],
+        )
     },
 }
 

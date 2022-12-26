@@ -3,7 +3,12 @@ from typing import List, Tuple
 from koda import Err, Ok, Result
 
 from wode.ast import BinaryExpression, Expression, LiteralExpression, UnaryExpression
-from wode.errors import WodeError, WodeErrorType
+from wode.errors import (
+    ExpectedSemicolonError,
+    UnexpectedEndOfExpressionError,
+    UnexpectedTokenTypeError,
+    WodeError,
+)
 from wode.token import EOFToken, Token
 from wode.token_type import TokenType
 
@@ -89,24 +94,12 @@ def parse_expression(
                     raise ValueError("?????")
         case TokenType.SEMICOLON:
             return (
-                Err(
-                    WodeError(
-                        WodeErrorType.UnexpectedEndOfExpressionError,
-                        state.source,
-                        token.position,
-                    )
-                ),
+                Err(UnexpectedEndOfExpressionError(state.source, token.position)),
                 state,
             )
         case _:
             return (
-                Err(
-                    WodeError(
-                        WodeErrorType.UnexpectedTokenType,
-                        state.source,
-                        token.position - 1,
-                    )
-                ),
+                Err(UnexpectedTokenTypeError(state.source, token.position - 1)),
                 state,
             )
 
@@ -147,13 +140,7 @@ def parse_expression(
             case _:
                 state = new_state
                 return (
-                    Err(
-                        WodeError(
-                            WodeErrorType.UnexpectedTokenType,
-                            state.source,
-                            token.position,
-                        )
-                    ),
+                    Err(UnexpectedTokenTypeError(state.source, token.position)),
                     state,
                 )
 
@@ -179,11 +166,7 @@ def parse_all(state: ParserState) -> Tuple[List[Expression], List[WodeError]]:
                 else:
                     # If we don't see a semicolon, raise an error
                     errors.append(
-                        WodeError(
-                            WodeErrorType.ExpectedSemicolonError,
-                            state.source,
-                            token.position - 1,
-                        )
+                        ExpectedSemicolonError(state.source, token.position - 1)
                     )
             case Err(err):
                 errors.append(err)
