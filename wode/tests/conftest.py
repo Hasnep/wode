@@ -413,7 +413,7 @@ test_cases = {
         ),
         "operator precedence": WodeTestCase(
             source="""
-            1 + 2 * 3 - 4 / 5;
+            1 + 2 * 3 - 4 / 5 ^ 6;
             """,
             expected_tokens=[
                 SimplifiedToken(TokenType.INTEGER, "1"),
@@ -425,10 +425,12 @@ test_cases = {
                 SimplifiedToken(TokenType.INTEGER, "4"),
                 SimplifiedToken(TokenType.SLASH, "/"),
                 SimplifiedToken(TokenType.INTEGER, "5"),
+                SimplifiedToken(TokenType.CARET, "^"),
+                SimplifiedToken(TokenType.INTEGER, "6"),
                 SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=[
-                ["-", ["+", "1", ["*", "2", "3"]], ["/", "4", "5"]],
+                ["-", ["+", "1", ["*", "2", "3"]], ["/", "4", ["^", "5", "6"]]],
             ],
         ),
         "boolean operator precedence": WodeTestCase(
@@ -448,7 +450,7 @@ test_cases = {
         "operator precedence with brackets": WodeTestCase(
             broken=True,
             source="""
-            -1*2+3/(4+5);
+            -1*2+3/(4+5)^6;
             """,
             expected_tokens=[
                 SimplifiedToken(TokenType.MINUS, "-"),
@@ -463,10 +465,16 @@ test_cases = {
                 SimplifiedToken(TokenType.PLUS, "+"),
                 SimplifiedToken(TokenType.INTEGER, "5"),
                 SimplifiedToken(TokenType.RIGHT_BRACKET, ")"),
+                SimplifiedToken(TokenType.CARET, "^"),
+                SimplifiedToken(TokenType.INTEGER, "6"),
                 SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=[
-                ["+", ["*", ["-", "1"], "2"], ["/", "3", ["group", ["+", "4", "5"]]]]
+                [
+                    "+",
+                    ["*", ["-", "1"], "2"],
+                    ["/", "3", ["^", ["group", ["+", "4", "5"]], "6"]],
+                ]
             ],
         ),
     },

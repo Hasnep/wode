@@ -3,6 +3,7 @@ from enum import Enum
 
 class TokenType(Enum):
     # Single-character tokens
+    CARET = "caret"
     COLON = "colon"
     COMMA = "comma"
     LEFT_BRACKET = "left_bracket"
