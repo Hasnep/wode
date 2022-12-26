@@ -145,11 +145,3 @@ def parse_all(state: ParserState) -> Tuple[List[Expression], List[WodeError]]:
                     )
             case Err(err):
                 errors.append(err)
-
-
-class Parser:
-    def __init__(self, tokens: List[Token], source: str):
-        self.state = ParserState(tokens, source)
-
-    def parse(self) -> Tuple[List[Expression], List[WodeError]]:
-        return parse_all(self.state)

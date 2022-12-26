@@ -4,7 +4,7 @@ from pathlib import Path
 import typer
 
 from wode.ast_to_s_expression import convert_to_s_expression
-from wode.parser import Parser
+from wode.parser import ParserState, parse_all
 from wode.scanner import scan_all_tokens
 
 __version__ = importlib.metadata.version("wode")
@@ -35,7 +35,7 @@ def main(source_file_path: Path = typer.Argument(None, dir_okay=False)):
         return
 
     # Parse the tokens into an AST
-    expressions, parsing_errors = Parser(tokens, source).parse()
+    expressions, parsing_errors = parse_all(ParserState(tokens, source))
 
     # If there were any parsing errors, show them and stop execution
     if len(parsing_errors) > 0:
