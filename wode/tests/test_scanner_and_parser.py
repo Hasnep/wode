@@ -3,7 +3,7 @@ from textwrap import dedent
 import pytest
 
 from wode.ast_to_s_expression import convert_to_s_expression
-from wode.parser import Parser
+from wode.parser import ParserState, parse_all
 from wode.scanner import scan_all_tokens
 from wode.tests.conftest import WodeTestCase, test_cases_flattened
 from wode.token_type import TokenType
@@ -60,7 +60,7 @@ def test_scanner_and_parser(test_case_id: str, test_case: WodeTestCase):
         return
 
     # Parse the tokens
-    expressions, parser_errors = Parser(tokens, source).parse()
+    expressions, parser_errors = parse_all(ParserState(tokens, source))
 
     # Convert the expressions to s-expressions
     parsed_ast = [convert_to_s_expression(e) for e in expressions]
