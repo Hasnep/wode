@@ -1,4 +1,5 @@
 from wode.token_type import TokenType
+from wode.utils import safe_substring
 
 
 class Token:
@@ -12,7 +13,7 @@ class Token:
 
     @property
     def lexeme(self) -> str:
-        return self._source[self.position : (self.position + self.length)]
+        return safe_substring(self._source, begin=self.position, length=self.length)
 
 
 class EOFToken(Token):
