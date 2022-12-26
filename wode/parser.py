@@ -90,6 +90,7 @@ def parse_expression(
                 | TokenType.MINUS
                 | TokenType.STAR
                 | TokenType.SLASH
+                | TokenType.CARET
                 | TokenType.AMPERSAND_AMPERSAND
                 | TokenType.BAR_BAR
             ):

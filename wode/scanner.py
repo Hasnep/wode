@@ -40,6 +40,7 @@ token_mapping = {
     "}": TokenType.RIGHT_CURLY_BRACKET,
     "*": TokenType.STAR,
     "/": TokenType.SLASH,
+    "^": TokenType.CARET,
     "+": TokenType.PLUS,
     # Possibly double character tokens
     "-": TokenType.MINUS,

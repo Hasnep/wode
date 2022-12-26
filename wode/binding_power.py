@@ -61,6 +61,8 @@ class InfixBindingPower(BindingPower):
 
 
 OPERATOR_BINDING_POWERS = [
+    # Exponentiation
+    InfixBindingPower(TokenType.CARET, 9, "right"),
     # Unary
     PrefixBindingPower(TokenType.PLUS, 8),
     PrefixBindingPower(TokenType.MINUS, 8),
