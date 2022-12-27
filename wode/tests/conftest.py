@@ -52,21 +52,19 @@ class WodeTestCase:
 
 test_cases = {
     "null case": {
-        # TODO: Allow parsing empty programs
         "null case": WodeTestCase(
             source="",
             expected_tokens=[],
-            expected_ast=None,
+            expected_ast=[],
         )
     },
     "comments": {
-        # TODO: Allow parsing empty programs
         "a comment": WodeTestCase(
             source="""
             # This is a comment
             """,
             expected_tokens=[],
-            expected_ast=None,
+            expected_ast=[],
         ),
         "multiple comments": WodeTestCase(
             source="""
@@ -74,7 +72,7 @@ test_cases = {
             # Multiple lines
             """,
             expected_tokens=[],
-            expected_ast=None,
+            expected_ast=[],
         ),
     },
     "numbers": {
