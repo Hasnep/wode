@@ -34,7 +34,7 @@ profile = "black"
 ignore = ["E501", "E203", "W503", "F401"]
 
 [tool.pytest.ini_options]
-timeout = 0.1
+timeout = 1.0
 addopts = "--cov=wode --cov-report=html"
 
 [tool.pyright]
