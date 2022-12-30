@@ -96,10 +96,10 @@ def scan_for_whitespace_token(state: ScannerState) -> Maybe[ScannerState]:
     match state.chomp():
         case Just((bite, new_state)):
             pass
-        case _:
+        case _:  # pragma: no cover
             raise UnreachableError(
                 "Scanning for whitespace happens after scanning for an EOF token."
-            )  # pragma: no cover
+            )
 
     if is_whitespace(bite):
         return Just(new_state)
@@ -114,10 +114,10 @@ def scan_for_comment_token(state: ScannerState) -> Maybe[ScannerState]:
     match state.chomp():
         case Just((bite, _)):
             pass
-        case _:
+        case _:  # pragma: no cover
             raise UnreachableError(
                 "Scanning for a comment token happens after scanning for an EOF token."
-            )  # pragma: no cover
+            )
 
     # If the first character is not a hash then we didn't find a comment
     if bite != "#":
@@ -142,10 +142,10 @@ def scan_for_string_token(
     match state.chomp():
         case Just((bite, state)):
             pass
-        case _:
+        case _:  # pragma: no cover
             raise UnreachableError(
                 "Scanning for a string token happens after scanning for an EOF token."
-            )  # pragma: no cover
+            )
 
     # If the first character isn't a quotation mark it's not a string
     if bite != '"':
@@ -182,10 +182,10 @@ def scan_for_n_character_token(
     match state.chomp():
         case Just((_, _)):
             pass
-        case _:
+        case _:  # pragma: no cover
             raise UnreachableError(
                 f"Scanning for a {n_characters} character token happens after scanning for an EOF token."
-            )  # pragma: no cover
+            )
 
     # Get the next n characters
     match state.chomp(n_characters):
@@ -211,10 +211,10 @@ def scan_for_number_token(
     match state.chomp():
         case Just((bite, new_state)):
             pass
-        case _:
+        case _:  # pragma: no cover
             raise UnreachableError(
                 "Scanning for a number token happens after scanning for an EOF token."
-            )  # pragma: no cover
+            )
 
     # If the first character is a decimal point, the number has no leading zero
     if bite == ".":
@@ -326,10 +326,10 @@ def scan_for_identifier_token(state: ScannerState) -> Maybe[Tuple[Token, Scanner
     match state.chomp():
         case Just((bite, _)):
             pass
-        case _:
+        case _:  # pragma: no cover
             raise UnreachableError(
                 "Scanning for an identifier token happens after scanning for an EOF token."
-            )  # pragma: no cover
+            )
 
     # Make sure the identifier starts with a valid character
     if bite not in VALID_IDENTIFIER_PREFIXES:
@@ -432,7 +432,7 @@ def scan_one_token(
                 state.source, state.position, unknown_character=bite
             )
             return (Err(unknown_character_error), new_state)
-        case _:
+        case _:  # pragma: no cover
             raise UnreachableError(
                 "Reaching an unknown character error happens after scanning for an EOF token."
             )

@@ -19,7 +19,7 @@ class BindingPower(AbstractBaseClass):
 
     @abstractmethod
     def left_right(self) -> Tuple[Optional[Float], Optional[Float]]:
-        pass
+        pass  # pragma: no cover
 
 
 class PrefixBindingPower(BindingPower):
@@ -54,7 +54,7 @@ class InfixBindingPower(BindingPower):
                 return (self.binding_power, self.binding_power + 0.1)
             case "right":
                 return (self.binding_power + 0.1, self.binding_power)
-            case _:
+            case _:  # pragma: no cover
                 raise UnreachableError(
                     "Infix operators can only be left or right associative."
                 )
