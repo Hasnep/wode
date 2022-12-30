@@ -1,5 +1,3 @@
-from typing import Any, List
-
 from wode.ast import (
     BinaryExpression,
     Expression,
@@ -8,8 +6,9 @@ from wode.ast import (
     UnaryExpression,
 )
 from wode.token_type import TokenType
+from wode.types import Any, List, Str
 
-SExpression = str | List[Any]
+SExpression = Str | List[Any]
 
 
 def convert_to_s_expression(expression: Expression) -> SExpression:

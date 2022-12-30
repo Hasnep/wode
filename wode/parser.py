@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 from koda import Err, Ok, Result
 
 from wode.ast import BinaryExpression, Expression, LiteralExpression, UnaryExpression
@@ -12,10 +10,11 @@ from wode.errors import (
 )
 from wode.token import EOFToken, Token
 from wode.token_type import TokenType
+from wode.types import Float, Int, List, Str, Tuple
 
 
 class ParserState:
-    def __init__(self, all_tokens: List[Token], source: str, position: int = 0) -> None:
+    def __init__(self, all_tokens: List[Token], source: Str, position: Int = 0) -> None:
         self._all_tokens = all_tokens
         self.position = position
         self.source = source
@@ -38,7 +37,7 @@ class ParserState:
 
 
 def parse_expression(
-    state: ParserState, minimum_binding_power: float
+    state: ParserState, minimum_binding_power: Float
 ) -> Tuple[Result[Expression, WodeError], ParserState]:
     token, state = state.chomp()
     match token.token_type:

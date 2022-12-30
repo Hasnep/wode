@@ -10,6 +10,7 @@ from wode.ast import (
 from wode.ast_to_s_expression import convert_to_s_expression
 from wode.token import Token
 from wode.token_type import TokenType
+from wode.types import Str
 
 
 @pytest.mark.parametrize(
@@ -46,6 +47,6 @@ from wode.token_type import TokenType
     ],
 )
 def test_converter_converts_expressions_to_s_expressions_correctly(
-    expression: Expression, expected_s_expression: str
+    expression: Expression, expected_s_expression: Str
 ):
     assert convert_to_s_expression(expression) == expected_s_expression
