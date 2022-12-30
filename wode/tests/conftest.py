@@ -74,6 +74,13 @@ test_cases = {
             expected_tokens=[],
             expected_ast=[],
         ),
+        "a comment without a terminating new line": WodeTestCase(
+            source="""
+            # Comment without a terminating new line
+            """.rstrip(),
+            expected_tokens=[],
+            expected_ast=[],
+        ),
     },
     "numbers": {
         "an integer": WodeTestCase(
@@ -96,7 +103,23 @@ test_cases = {
             ],
             expected_ast=["123.456"],
         ),
-        "no leading zero": WodeTestCase(
+        "an integer terminated by the end of the file": WodeTestCase(
+            source="""
+            123
+            """.rstrip(),
+            expected_tokens=[
+                SimplifiedToken(TokenType.INTEGER, "123"),
+            ],
+        ),
+        "a float terminated by the end of the file": WodeTestCase(
+            source="""
+            123.456
+            """.rstrip(),
+            expected_tokens=[
+                SimplifiedToken(TokenType.FLOAT, "123.456"),
+            ],
+        ),
+        "float with no leading zero": WodeTestCase(
             source="""
             .456;
             """,
@@ -130,7 +153,9 @@ test_cases = {
                 SimplifiedToken(TokenType.IDENTIFIER, "foo"),
                 SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
-            expected_ast=None,
+            expected_ast=[
+                "foo",
+            ],
         ),
         "a keyword": WodeTestCase(
             source="""
@@ -151,6 +176,15 @@ test_cases = {
                 SimplifiedToken(TokenType.SEMICOLON, ";"),
             ],
             expected_ast=["true"],
+        ),
+        "an identifier without a terminating newline": WodeTestCase(
+            source="""
+            foo
+            """.rstrip(),
+            expected_tokens=[
+                SimplifiedToken(TokenType.IDENTIFIER, "foo"),
+            ],
+            expected_ast=None,
         ),
     },
     "string": {
