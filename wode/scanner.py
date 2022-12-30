@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 from koda import Err, Just, Maybe, Ok, Result, mapping_get, nothing
 
 from wode.constants import VALID_IDENTIFIER_CHARACTERS, VALID_IDENTIFIER_PREFIXES
@@ -13,6 +11,7 @@ from wode.errors import (
 )
 from wode.token import EOFToken, Token
 from wode.token_type import TokenType
+from wode.types import Int, List, Str, Tuple
 from wode.utils import UnreachableError, is_digit, is_whitespace, safe_substring
 
 token_mapping = {
@@ -70,11 +69,11 @@ reserved_keywords = {
 
 
 class ScannerState:
-    def __init__(self, source: str, position: int = 0) -> None:
+    def __init__(self, source: Str, position: Int = 0) -> None:
         self.source = source
-        self.position: int = position
+        self.position: Int = position
 
-    def chomp(self, n: int = 1) -> Maybe[Tuple[str, "ScannerState"]]:
+    def chomp(self, n: Int = 1) -> Maybe[Tuple[Str, "ScannerState"]]:
         try:
             first_n_characters = safe_substring(
                 self.source, begin=self.position, length=n
@@ -177,7 +176,7 @@ def scan_for_string_token(
 
 
 def scan_for_n_character_token(
-    state: ScannerState, n_characters: int
+    state: ScannerState, n_characters: Int
 ) -> Maybe[Tuple[Token, ScannerState]]:
     # Check if we've reached the end of the file
     match state.chomp():
@@ -439,7 +438,7 @@ def scan_one_token(
             )
 
 
-def scan_all_tokens(source: str) -> Tuple[List[Token], List[WodeError]]:
+def scan_all_tokens(source: Str) -> Tuple[List[Token], List[WodeError]]:
     tokens: List[Token] = []
     errors: List[WodeError] = []
     state = ScannerState(source)

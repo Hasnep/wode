@@ -1,28 +1,27 @@
-from typing import List, Optional, TypeVar
-
 from wode.constants import DIGITS, LETTERS, WHITESPACE_CHARACTERS
+from wode.types import Bool, Int, List, Optional, Str, TypeVar
 
 T = TypeVar("T")
 
 
-def is_letter(c: str) -> bool:
+def is_letter(c: Str) -> Bool:
     return c in LETTERS
 
 
-def is_digit(c: str) -> bool:
+def is_digit(c: Str) -> Bool:
     return c in DIGITS
 
 
-def is_whitespace(c: str) -> bool:
+def is_whitespace(c: Str) -> Bool:
     return c in WHITESPACE_CHARACTERS
 
 
 def safe_slice(
     iterator: List[T],
     *,
-    begin: int,
-    length: Optional[int] = None,
-    end: Optional[int] = None,
+    begin: Int,
+    length: Optional[Int] = None,
+    end: Optional[Int] = None,
 ) -> List[T]:
     """Slice an iterator and raise an IndexError if you try to access an out of bounds index."""
     match (length, end):
@@ -37,14 +36,14 @@ def safe_slice(
 
 
 def safe_substring(
-    s: str,
+    s: Str,
     *,
-    begin: int,
-    length: Optional[int] = None,
-    end: Optional[int] = None,
-) -> str:
+    begin: Int,
+    length: Optional[Int] = None,
+    end: Optional[Int] = None,
+) -> Str:
     """Get a substring and raise an IndexError if you try to access an out of bounds index."""
-    return "".join(safe_slice(list(s), begin=begin, length=length, end=end))
+    return "".join(safe_slice(List(s), begin=begin, length=length, end=end))
 
 
 class UnreachableError(Exception):

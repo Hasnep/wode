@@ -7,14 +7,15 @@ from wode.parser import ParserState, parse_all
 from wode.scanner import scan_all_tokens
 from wode.tests.conftest import WodeTestCase, test_cases_flattened
 from wode.token_type import TokenType
+from wode.types import List, Str
 
 
 @pytest.mark.parametrize(
     ",".join(["test_case_id", "test_case"]),
     test_cases_flattened.items(),
-    ids=list(test_cases_flattened.keys()),
+    ids=List(test_cases_flattened.keys()),
 )
-def test_scanner_and_parser(test_case_id: str, test_case: WodeTestCase):
+def test_scanner_and_parser(test_case_id: Str, test_case: WodeTestCase):
     if test_case.broken:
         pytest.xfail()
 
@@ -33,7 +34,7 @@ def test_scanner_and_parser(test_case_id: str, test_case: WodeTestCase):
     if len(expected_scanner_error_types) == 0:
         assert len(scanner_error_types) == 0, (
             f"Test case `{test_case_id}` unexpectedly raised scanner error types: "
-            + ", ".join([str(e) for e in scanner_error_types])
+            + ", ".join([Str(e) for e in scanner_error_types])
         )
 
         # Test the tokens were scanned as expected
@@ -49,9 +50,9 @@ def test_scanner_and_parser(test_case_id: str, test_case: WodeTestCase):
         assert scanner_error_types == expected_scanner_error_types, dedent(
             f"""
             Expected test case `{test_case_id}` to return errors:
-            {', '.join([str(e) for e in expected_scanner_error_types])}
+            {', '.join([Str(e) for e in expected_scanner_error_types])}
             but it returned:
-            {', '.join([str(e) for e in  scanner_error_types])}
+            {', '.join([Str(e) for e in  scanner_error_types])}
             """
         )
 

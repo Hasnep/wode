@@ -1,16 +1,17 @@
 from itertools import accumulate
-from typing import List
+
+from wode.types import Int, List, Str
 
 
-def get_lines(source: str) -> List[str]:
+def get_lines(source: Str) -> List[Str]:
     return source.splitlines(keepends=True)
 
 
-def get_line(source: str, line_number: int) -> str:
+def get_line(source: Str, line_number: Int) -> Str:
     return get_lines(source)[line_number - 1]
 
 
-def get_line_number_of_position(source: str, position: int) -> int:
+def get_line_number_of_position(source: Str, position: Int) -> Int:
     lines = get_lines(source)
     line_lengths = (len(line) for line in lines)
     line_boundaries = accumulate(line_lengths)
@@ -20,7 +21,7 @@ def get_line_number_of_position(source: str, position: int) -> int:
     raise ValueError(f"Position {position} could not be found in source.")
 
 
-def get_position_in_line(source: str, position: int) -> int:
+def get_position_in_line(source: Str, position: Int) -> Int:
     lines = get_lines(source)
     line_lengths = (len(line) for line in lines)
     line_boundaries = accumulate(line_lengths)

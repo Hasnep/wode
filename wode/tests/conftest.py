@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
-from typing import List, Optional, Type
 
 from wode.ast_to_s_expression import SExpression
 from wode.errors import (
@@ -13,6 +12,7 @@ from wode.errors import (
     WodeError,
 )
 from wode.token_type import TokenType
+from wode.types import Bool, List, Optional, Str, Type
 
 DATA_FOLDER = Path(".") / "data"
 
@@ -20,17 +20,17 @@ DATA_FOLDER = Path(".") / "data"
 @dataclass
 class SimplifiedToken:
     token_type: TokenType
-    lexeme: str
+    lexeme: Str
 
 
 class WodeTestCase:
     def __init__(
         self,
-        source: str,
+        source: Str,
         expected_tokens: List[SimplifiedToken] = [],
         expected_scanner_error_types: List[Type[WodeError]] = [],
         expected_ast: Optional[List[SExpression]] = None,
-        broken: bool = False,
+        broken: Bool = False,
     ) -> None:
         if len(expected_tokens) > 0 and len(expected_scanner_error_types) > 0:
             raise ValueError(
