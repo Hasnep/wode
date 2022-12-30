@@ -11,6 +11,7 @@ from wode.errors import (
 from wode.token import EOFToken, Token
 from wode.token_type import TokenType
 from wode.types import Float, Int, List, Str, Tuple
+from wode.utils import UnreachableError
 
 
 class ParserState:
@@ -29,7 +30,7 @@ class ParserState:
                 self._all_tokens, self.source, self.position + 1
             )
 
-    def debug_dump(self) -> None:
+    def _debug_dump(self) -> None:  # pragma: no cover
         for i, token in enumerate(self._all_tokens):
             print(
                 f"{i} {token.token_type}: {token.lexeme}{' <--' if i == self.position else ''}"
@@ -63,8 +64,10 @@ def parse_expression(
                     state = new_state
                 case Err(err), new_state:
                     return Err(err), new_state
-                case _:
-                    raise ValueError("?????")
+                case _:  # pragma: no cover
+                    raise UnreachableError(
+                        "Parser can only return a tuple of a Result and a ParserState."
+                    )
         case TokenType.SEMICOLON:
             return (
                 Err(UnexpectedEndOfExpressionError(state.source, token.position)),
@@ -80,7 +83,10 @@ def parse_expression(
         token, new_state = state.chomp()
         match token.token_type:
             case TokenType.EOF:
-                break
+                return (
+                    Err(ExpectedSemicolonError(state.source, token.position - 1)),
+                    new_state,
+                )
             case TokenType.SEMICOLON:
                 # Finish parsing this expression
                 break
