@@ -2,82 +2,96 @@ from textwrap import dedent
 
 import pytest
 
-from wode.ast_to_s_expression import convert_to_s_expression
+from wode.ast_to_s_expression import SExpression, convert_to_s_expression
+from wode.errors import WodeError
 from wode.parser import ParserState, parse_all
 from wode.scanner import scan_all_tokens
-from wode.tests.conftest import WodeTestCase, test_cases_flattened
-from wode.token_type import TokenType
-from wode.types import List, Str
+from wode.tests.conftest import SimplifiedToken, test_cases
+from wode.types import List, Str, Type
 
 
 @pytest.mark.parametrize(
-    ",".join(["test_case_id", "test_case"]),
-    test_cases_flattened.items(),
-    ids=List(test_cases_flattened.keys()),
+    (
+        "test_case_id",
+        "source",
+        "expected_tokens",
+        "expected_scanner_error_types",
+        "expected_s_expressions",
+        "expected_parser_error_types",
+    ),
+    [
+        pytest.param(
+            tc.test_case_id,
+            tc.source,
+            tc.expected_tokens,
+            tc.expected_scanner_error_types,
+            tc.expected_s_expressions,
+            tc.expected_parser_error_types,
+            marks=[pytest.mark.xfail(tc.broken, reason="Test case is broken.")],
+            id=tc.test_case_id,
+        )
+        for tc in test_cases
+    ],
 )
-def test_scanner_and_parser(test_case_id: Str, test_case: WodeTestCase):
-    if test_case.broken:
-        pytest.xfail()
-
-    source = test_case.source
-    expected_tokens = test_case.expected_tokens
-    expected_scanner_error_types = test_case.expected_scanner_error_types
-    expected_ast = test_case.expected_ast
-    del test_case
-
+def test_test_cases(
+    test_case_id: Str,
+    source: Str,
+    expected_tokens: List[SimplifiedToken],
+    expected_scanner_error_types: List[Type[WodeError]],
+    expected_s_expressions: List[SExpression],
+    expected_parser_error_types: List[Type[WodeError]],
+) -> None:
     # Scan the source
     tokens, scanner_errors = scan_all_tokens(source)
 
-    # Extract the error types that were returned
-    scanner_error_types = [type(e) for e in scanner_errors]
-
-    if len(expected_scanner_error_types) == 0:
-        assert len(scanner_error_types) == 0, (
-            f"Test case `{test_case_id}` unexpectedly raised scanner error types: "
-            + ", ".join([Str(e) for e in scanner_error_types])
-        )
-
-        # Test the tokens were scanned as expected
-        tokens_simplified = [(token.token_type, token.lexeme) for token in tokens]
-        expected_tokens_simplified = [
-            (token.token_type, token.lexeme) for token in expected_tokens
-        ] + [(TokenType.EOF, "")]
-        assert (
-            tokens_simplified == expected_tokens_simplified
-        ), f"Test case `{test_case_id}` was not scanned correctly."
-    else:
-        # If we expected scanner errors to be returned, test that the right errors were returned
-        assert scanner_error_types == expected_scanner_error_types, dedent(
-            f"""
-            Expected test case `{test_case_id}` to return errors:
-            {', '.join([Str(e) for e in expected_scanner_error_types])}
-            but it returned:
-            {', '.join([Str(e) for e in  scanner_error_types])}
-            """
-        )
-
-    # If the test case doesn't have a valid AST then don't bother parsing it
-    if expected_ast is None:
-        return
-
-    # Parse the tokens
-    expressions, parser_errors = parse_all(ParserState(tokens, source))
-
-    # Convert the expressions to s-expressions
-    parsed_ast = [convert_to_s_expression(e) for e in expressions]
-
-    # If there were any parser errors, raise them
-    assert len(parser_errors) == 0, "\n".join(
-        [f"Parsing errors found in test case `{test_case_id}`:"]
-        + [error.get_message() for error in parser_errors]
+    # Test the tokens were scanned as expected
+    tokens_simplified = [
+        SimplifiedToken(token.token_type, token.lexeme) for token in tokens
+    ]
+    assert tokens_simplified == expected_tokens, dedent(
+        f"""
+        Test case `{test_case_id}` was expected to be scanned as these tokens:
+        {[Str(t) for t in expected_tokens]}
+        but it was scanned as:
+        {[Str(t) for t in tokens_simplified]}
+        """
     )
 
-    # Check the parser works as expected
-    assert parsed_ast == expected_ast, dedent(
+    # Extract the error types that were returned
+    scanner_error_types = [type(e) for e in scanner_errors]
+    # Test that the right errors were returned
+    assert scanner_error_types == expected_scanner_error_types, dedent(
+        f"""
+        Expected test case `{test_case_id}` to return errors:
+        {[Str(e) for e in expected_scanner_error_types]}
+        but it returned:
+        {[Str(e) for e in  scanner_error_types]}
+        """
+    )
+
+    # Parse the tokens
+    parsed_expressions, parser_errors = parse_all(ParserState(tokens, source))
+
+    # Convert the expressions to s-expressions
+    parsed_s_expressions = [convert_to_s_expression(e) for e in parsed_expressions]
+    # Check the tokens were parsed as expected
+    assert parsed_s_expressions == expected_s_expressions, dedent(
         f"""
         Expected test case `{test_case_id}` to be parsed as:
-        {expected_ast}
+        {expected_s_expressions}
         but it was parsed as:
-        {parsed_ast}
+        {parsed_s_expressions}
+        """
+    )
+
+    # Extract the error types that were returned
+    parser_error_types = [type(e) for e in parser_errors]
+    # Test that the right errors were returned
+    assert parser_error_types == expected_parser_error_types, dedent(
+        f"""
+        Expected test case `{test_case_id}` to return errors:
+        {[Str(e) for e in expected_parser_error_types]}
+        but it returned:
+        {[Str(e) for e in  parser_error_types]}
         """
     )
