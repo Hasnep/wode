@@ -8,38 +8,64 @@ from wode.ast import (
     UnaryExpression,
 )
 from wode.ast_to_s_expression import convert_to_s_expression
+from wode.source import Source, SourcePosition, SourceRange
 from wode.token import Token
 from wode.token_type import TokenType
-from wode.types import Str
+from wode.types import Int, Str
+
+
+def construct_token(
+    source_code: Str,
+    start: Int,
+    end: Int,
+    token_type: TokenType,
+) -> Token:
+    source = Source(None, source_code)
+    source_range = SourceRange(
+        source, SourcePosition(source, start), SourcePosition(source, end)
+    )
+    return Token(token_type, source_range)
 
 
 @pytest.mark.parametrize(
     ",".join(["expression", "expected_s_expression"]),
     [
-        (LiteralExpression(Token(TokenType.INTEGER, 0, 3, "123")), "123"),
-        (LiteralExpression(Token(TokenType.FLOAT, 0, 7, "456.789")), "456.789"),
+        (LiteralExpression(construct_token("123", 0, 3, TokenType.INTEGER)), "123"),
+        (
+            LiteralExpression(construct_token("456.789", 0, 7, TokenType.FLOAT)),
+            "456.789",
+        ),
         (
             GroupingExpression(
-                LiteralExpression(Token(TokenType.FLOAT, 1, 7, "(456.789)"))
+                LiteralExpression(construct_token("(456.789)", 1, 8, TokenType.FLOAT))
             ),
             ["group", "456.789"],
         ),
         (
             UnaryExpression(
-                Token(TokenType.MINUS, 0, 1, "-123"),
-                LiteralExpression(Token(TokenType.INTEGER, 1, 3, "-123")),
+                construct_token("-123", 0, 1, TokenType.MINUS),
+                LiteralExpression(construct_token("-123", 1, 4, TokenType.INTEGER)),
             ),
             ["-", "123"],
         ),
         (
             BinaryExpression(
                 UnaryExpression(
-                    Token(TokenType.MINUS, 0, 1, "-123*(456.789)"),
-                    LiteralExpression(Token(TokenType.INTEGER, 1, 3, "-123*(456.789)")),
+                    construct_token(
+                        "-123*(456.789)",
+                        0,
+                        1,
+                        TokenType.MINUS,
+                    ),
+                    LiteralExpression(
+                        construct_token("-123*(456.789)", 1, 4, TokenType.INTEGER)
+                    ),
                 ),
-                Token(TokenType.STAR, 4, 1, "-123*(456.789)"),
+                construct_token("-123*(456.789)", 4, 5, TokenType.STAR),
                 GroupingExpression(
-                    LiteralExpression(Token(TokenType.FLOAT, 6, 7, "-123*(456.789)"))
+                    LiteralExpression(
+                        construct_token("-123*(456.789)", 6, 13, TokenType.FLOAT)
+                    )
                 ),
             ),
             ["*", ["-", "123"], ["group", "456.789"]],

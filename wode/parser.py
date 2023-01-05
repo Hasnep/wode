@@ -8,14 +8,17 @@ from wode.errors import (
     UnexpectedTokenTypeError,
     WodeError,
 )
+from wode.source import Source, SourcePosition
 from wode.token import EOFToken, Token
 from wode.token_type import TokenType
-from wode.types import Float, Int, List, Str, Tuple
+from wode.types import Float, Int, List, Tuple
 from wode.utils import UnreachableError
 
 
 class ParserState:
-    def __init__(self, all_tokens: List[Token], source: Str, position: Int = 0) -> None:
+    def __init__(
+        self, all_tokens: List[Token], source: Source, position: Int = 0
+    ) -> None:
         self._all_tokens = all_tokens
         self.position = position
         self.source = source
@@ -70,13 +73,11 @@ def parse_expression(
                     )
         case TokenType.SEMICOLON:
             unexpected_end_of_expression_error = UnexpectedEndOfExpressionError(
-                state.source, token.position
+                token.source_range.start
             )
             return Err(unexpected_end_of_expression_error), state
         case _:
-            unexpected_token_type_error = UnexpectedTokenTypeError(
-                state.source, token.position - 1
-            )
+            unexpected_token_type_error = UnexpectedTokenTypeError(token.source_range)
             return Err(unexpected_token_type_error), state
 
     while True:
@@ -84,7 +85,7 @@ def parse_expression(
         match token.token_type:
             case TokenType.EOF:
                 expected_semicolon_error = ExpectedSemicolonError(
-                    state.source, token.position - 1
+                    SourcePosition(state.source, token.source_range.start.position - 1)
                 )
                 return Err(expected_semicolon_error), new_state
             case TokenType.SEMICOLON:
@@ -120,7 +121,7 @@ def parse_expression(
             case _:
                 state = new_state
                 unexpected_token_type_error = UnexpectedTokenTypeError(
-                    state.source, token.position
+                    token.source_range
                 )
                 return Err(unexpected_token_type_error), state
 
@@ -145,8 +146,11 @@ def parse_all(state: ParserState) -> Tuple[List[Expression], List[WodeError]]:
                     expressions.append(expression)
                 else:
                     # If we don't see a semicolon, raise an error
-                    errors.append(
-                        ExpectedSemicolonError(state.source, token.position - 1)
+                    expected_semicolon_error = ExpectedSemicolonError(
+                        SourcePosition(
+                            state.source, token.source_range.start.position - 1
+                        )
                     )
+                    errors.append(expected_semicolon_error)
             case Err(err):
                 errors.append(err)

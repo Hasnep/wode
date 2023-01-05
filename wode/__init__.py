@@ -6,6 +6,7 @@ import typer
 from wode.ast_to_s_expression import convert_to_s_expression
 from wode.parser import ParserState, parse_all
 from wode.scanner import scan_all_tokens
+from wode.source import Source
 
 __version__ = importlib.metadata.version("wode")
 
@@ -22,7 +23,7 @@ def show_version():
 def main(source_file_path: Path = typer.Argument(None, dir_okay=False)):
     # Read the source code from the specified file
     with open(source_file_path, "r") as f:
-        source = f.read()
+        source = Source(source_file_path, f.read())
 
     # Scan the source code into tokens
     tokens, scanner_errors = scan_all_tokens(source)

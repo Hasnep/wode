@@ -9,10 +9,11 @@ from wode.errors import (
     UnterminatedFloatError,
     WodeError,
 )
+from wode.source import Source, SourcePosition, SourceRange
 from wode.token import EOFToken, Token
 from wode.token_type import TokenType
 from wode.types import Int, List, Str, Tuple
-from wode.utils import UnreachableError, is_digit, is_whitespace, safe_substring
+from wode.utils import UnreachableError, is_digit, is_whitespace
 
 token_mapping = {
     # Triple character tokens
@@ -69,15 +70,15 @@ reserved_keywords = {
 
 
 class ScannerState:
-    def __init__(self, source: Str, position: Int = 0) -> None:
+    def __init__(self, source: Source, position: Int = 0) -> None:
         self.source = source
-        self.position: Int = position
+        self.position = position
 
     def chomp(self, n: Int = 1) -> Maybe[Tuple[Str, "ScannerState"]]:
         try:
-            first_n_characters = safe_substring(
-                self.source, start=self.position, length=n
-            )
+            first_n_characters = SourceRange(
+                self.source, self.position, self.position + n
+            ).lexeme
         except IndexError:
             return nothing
         new_position = self.position + n
@@ -158,19 +159,18 @@ def scan_for_string_token(
                 pass
             case _:
                 unexpected_end_of_file_error = UnexpectedEndOfFileError(
-                    state.source, state.position - 1
+                    SourcePosition(state.source, state.position - 1)
                 )
                 return Just((Err(unexpected_end_of_file_error), state))
 
         # Check if we found the closing quotation mark
         if bite == '"':
             end_of_string_position = state.position - 1
-            token_length = end_of_string_position - start_of_string_position
             string_token = Token(
                 TokenType.STRING,
-                start_of_string_position,
-                token_length,
-                state.source,
+                SourceRange(
+                    state.source, start_of_string_position, end_of_string_position
+                ),
             )
             return Just((Ok(string_token), state))
 
@@ -197,7 +197,10 @@ def scan_for_n_character_token(
 
     maybe_token_type = mapping_get(token_mapping, bite)
     maybe_token = maybe_token_type.map(
-        lambda token_type: Token(token_type, state.position, n_characters, state.source)
+        lambda token_type: Token(
+            token_type,
+            SourceRange(state.source, state.position, state.position + n_characters),
+        )
     )
     return maybe_token.map(lambda token: (token, new_state))
 
@@ -229,13 +232,8 @@ def scan_for_number_token(
                 case _:
                     break
             state = new_state
-        float_without_leading_zero = safe_substring(
-            state.source, start=start_of_number_position, end=state.position
-        )
         no_leading_zero_on_float_error = NoLeadingZeroOnFloatError(
-            state.source,
-            state.position,
-            float_without_leading_zero=float_without_leading_zero,
+            SourceRange(state.source, start_of_number_position, state.position)
         )
         return Just((Err(no_leading_zero_on_float_error), new_state))
     elif is_digit(bite):
@@ -278,13 +276,10 @@ def scan_for_number_token(
                                     break
                             case _:
                                 break
-                    float_with_too_many_decimal_points = safe_substring(
-                        state.source, start=start_of_number_position, end=state.position
-                    )
                     too_many_decimal_points_error = TooManyDecimalPointsError(
-                        state.source,
-                        state.position,
-                        float_with_too_many_decimal_points=float_with_too_many_decimal_points,
+                        SourceRange(
+                            state.source, start_of_number_position, state.position
+                        )
                     )
                     return Just((Err(too_many_decimal_points_error), state))
                 case Just((bite, new_state)):
@@ -298,26 +293,16 @@ def scan_for_number_token(
                     break
             state = new_state
         if not found_a_fractional_part:
-            unterminated_float = safe_substring(
-                state.source,
-                start=start_of_number_position,
-                end=state.position,
-            )
             unterminated_float_error = UnterminatedFloatError(
-                state.source,
-                state.position,
-                unterminated_float=unterminated_float,
+                SourceRange(state.source, start_of_number_position, state.position)
             )
             return Just((Err(unterminated_float_error), state))
 
     # Return the number token
-    token_length = state.position - start_of_number_position
-    if found_a_decimal_point:
-        token_type = TokenType.FLOAT
-    else:
-        token_type = TokenType.INTEGER
-
-    token = Token(token_type, start_of_number_position, token_length, state.source)
+    token_type = TokenType.FLOAT if found_a_decimal_point else TokenType.INTEGER
+    token = Token(
+        token_type, SourceRange(state.source, start_of_number_position, state.position)
+    )
     return Just((Ok(token), state))
 
 
@@ -348,19 +333,14 @@ def scan_for_identifier_token(state: ScannerState) -> Maybe[Tuple[Token, Scanner
                 break
         state = new_state
 
-    # Return the identifier token
     end_of_identifier_position = state.position
-    identifier = safe_substring(
-        state.source,
-        start=start_of_identifier_position,
-        end=end_of_identifier_position,
+    token_source_range = SourceRange(
+        state.source, start_of_identifier_position, end_of_identifier_position
     )
-    token = Token(
-        reserved_keywords.get(identifier, TokenType.IDENTIFIER),
-        start_of_identifier_position,
-        len(identifier),
-        state.source,
-    )
+    # Try to find the token type of the reserved keyword, defaulting to the identifier type if one isn't found
+    token_type = reserved_keywords.get(token_source_range.lexeme, TokenType.IDENTIFIER)
+
+    token = Token(token_type, token_source_range)
     return Just((token, state))
 
 
@@ -427,9 +407,9 @@ def scan_one_token(
             pass
 
     match state.chomp():
-        case Just((bite, new_state)):
+        case Just((_, new_state)):
             unknown_character_error = UnknownCharacterError(
-                state.source, state.position, unknown_character=bite
+                SourcePosition(state.source, state.position)
             )
             return Err(unknown_character_error), new_state
         case _:  # pragma: no cover
@@ -438,7 +418,7 @@ def scan_one_token(
             )
 
 
-def scan_all_tokens(source: Str) -> Tuple[List[Token], List[WodeError]]:
+def scan_all_tokens(source: Source) -> Tuple[List[Token], List[WodeError]]:
     tokens: List[Token] = []
     errors: List[WodeError] = []
     state = ScannerState(source)

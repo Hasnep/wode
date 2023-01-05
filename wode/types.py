@@ -13,3 +13,4 @@ Str: TypeAlias = str
 Tuple = tuple
 Type = typing.Type
 TypeVar: TypeAlias = typing.TypeVar
+Union = typing.Union

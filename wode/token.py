@@ -1,22 +1,22 @@
+from wode.source import Source, SourceRange
 from wode.token_type import TokenType
-from wode.types import Int, Str
-from wode.utils import safe_substring
+from wode.types import Str
 
 
 class Token:
-    def __init__(
-        self, token_type: TokenType, position: Int, length: Int, source: Str
-    ) -> None:
+    def __init__(self, token_type: TokenType, source_range: SourceRange) -> None:
         self.token_type = token_type
-        self.position = position
-        self.length = length
-        self._source = source
+        self.source_range = source_range
 
     @property
     def lexeme(self) -> Str:
-        return safe_substring(self._source, start=self.position, length=self.length)
+        return self.source_range.lexeme
 
 
 class EOFToken(Token):
-    def __init__(self, source: Str) -> None:
-        super().__init__(TokenType.EOF, len(source), 0, source)
+    def __init__(self, source: Source) -> None:
+        end_of_source_position = len(source.code)
+        super().__init__(
+            TokenType.EOF,
+            SourceRange(source, end_of_source_position, end_of_source_position),
+        )

@@ -6,6 +6,7 @@ from wode.ast_to_s_expression import SExpression, convert_to_s_expression
 from wode.errors import WodeError
 from wode.parser import ParserState, parse_all
 from wode.scanner import scan_all_tokens
+from wode.source import Source
 from wode.tests.conftest import SimplifiedToken, test_cases
 from wode.types import List, Str, Type
 
@@ -35,7 +36,7 @@ from wode.types import List, Str, Type
 )
 def test_test_cases(
     test_case_id: Str,
-    source: Str,
+    source: Source,
     expected_tokens: List[SimplifiedToken],
     expected_scanner_error_types: List[Type[WodeError]],
     expected_s_expressions: List[SExpression],
