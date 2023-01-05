@@ -14,7 +14,7 @@ class Token:
 
     @property
     def lexeme(self) -> Str:
-        return safe_substring(self._source, begin=self.position, length=self.length)
+        return safe_substring(self._source, start=self.position, length=self.length)
 
 
 class EOFToken(Token):

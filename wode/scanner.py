@@ -76,7 +76,7 @@ class ScannerState:
     def chomp(self, n: Int = 1) -> Maybe[Tuple[Str, "ScannerState"]]:
         try:
             first_n_characters = safe_substring(
-                self.source, begin=self.position, length=n
+                self.source, start=self.position, length=n
             )
         except IndexError:
             return nothing
@@ -230,7 +230,7 @@ def scan_for_number_token(
                     break
             state = new_state
         float_without_leading_zero = safe_substring(
-            state.source, begin=start_of_number_position, end=state.position
+            state.source, start=start_of_number_position, end=state.position
         )
         no_leading_zero_on_float_error = NoLeadingZeroOnFloatError(
             state.source,
@@ -279,7 +279,7 @@ def scan_for_number_token(
                             case _:
                                 break
                     float_with_too_many_decimal_points = safe_substring(
-                        state.source, begin=start_of_number_position, end=state.position
+                        state.source, start=start_of_number_position, end=state.position
                     )
                     too_many_decimal_points_error = TooManyDecimalPointsError(
                         state.source,
@@ -300,7 +300,7 @@ def scan_for_number_token(
         if not found_a_fractional_part:
             unterminated_float = safe_substring(
                 state.source,
-                begin=start_of_number_position,
+                start=start_of_number_position,
                 end=state.position,
             )
             unterminated_float_error = UnterminatedFloatError(
@@ -352,7 +352,7 @@ def scan_for_identifier_token(state: ScannerState) -> Maybe[Tuple[Token, Scanner
     end_of_identifier_position = state.position
     identifier = safe_substring(
         state.source,
-        begin=start_of_identifier_position,
+        start=start_of_identifier_position,
         end=end_of_identifier_position,
     )
     token = Token(
