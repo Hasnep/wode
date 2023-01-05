@@ -17,3 +17,6 @@ jobs:
         uses: actions/setup-python@v4
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.0
+        env:
+          # Don't fail when running on main branch
+          SKIP: no-commit-to-branch
