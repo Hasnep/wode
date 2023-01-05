@@ -431,7 +431,7 @@ def scan_one_token(
             unknown_character_error = UnknownCharacterError(
                 state.source, state.position, unknown_character=bite
             )
-            return (Err(unknown_character_error), new_state)
+            return Err(unknown_character_error), new_state
         case _:  # pragma: no cover
             raise UnreachableError(
                 "Reaching an unknown character error happens after scanning for an EOF token."

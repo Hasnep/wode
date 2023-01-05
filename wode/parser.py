@@ -69,24 +69,24 @@ def parse_expression(
                         "Parser can only return a tuple of a Result and a ParserState."
                     )
         case TokenType.SEMICOLON:
-            return (
-                Err(UnexpectedEndOfExpressionError(state.source, token.position)),
-                state,
+            unexpected_end_of_expression_error = UnexpectedEndOfExpressionError(
+                state.source, token.position
             )
+            return Err(unexpected_end_of_expression_error), state
         case _:
-            return (
-                Err(UnexpectedTokenTypeError(state.source, token.position - 1)),
-                state,
+            unexpected_token_type_error = UnexpectedTokenTypeError(
+                state.source, token.position - 1
             )
+            return Err(unexpected_token_type_error), state
 
     while True:
         token, new_state = state.chomp()
         match token.token_type:
             case TokenType.EOF:
-                return (
-                    Err(ExpectedSemicolonError(state.source, token.position - 1)),
-                    new_state,
+                expected_semicolon_error = ExpectedSemicolonError(
+                    state.source, token.position - 1
                 )
+                return Err(expected_semicolon_error), new_state
             case TokenType.SEMICOLON:
                 # Finish parsing this expression
                 break
@@ -119,10 +119,10 @@ def parse_expression(
                         return Err(err), state
             case _:
                 state = new_state
-                return (
-                    Err(UnexpectedTokenTypeError(state.source, token.position)),
-                    state,
+                unexpected_token_type_error = UnexpectedTokenTypeError(
+                    state.source, token.position
                 )
+                return Err(unexpected_token_type_error), state
 
     return Ok(lhs), state
 

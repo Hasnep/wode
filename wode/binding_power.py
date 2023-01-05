@@ -27,7 +27,7 @@ class PrefixBindingPower(BindingPower):
         super().__init__(token_type, "prefix", binding_power)
 
     def left_right(self) -> Tuple[None, Float]:
-        return (None, self.binding_power)
+        return None, self.binding_power
 
 
 class PostfixBindingPower(BindingPower):
@@ -35,7 +35,7 @@ class PostfixBindingPower(BindingPower):
         super().__init__(token_type, "postfix", binding_power)
 
     def left_right(self) -> Tuple[Float, None]:
-        return (self.binding_power, None)
+        return self.binding_power, None
 
 
 class InfixBindingPower(BindingPower):
@@ -51,9 +51,9 @@ class InfixBindingPower(BindingPower):
     def left_right(self) -> Tuple[Float, Float]:
         match self.associativity:
             case "left":
-                return (self.binding_power, self.binding_power + 0.1)
+                return self.binding_power, self.binding_power + 0.1
             case "right":
-                return (self.binding_power + 0.1, self.binding_power)
+                return self.binding_power + 0.1, self.binding_power
             case _:  # pragma: no cover
                 raise UnreachableError(
                     "Infix operators can only be left or right associative."
