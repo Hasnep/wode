@@ -1,6 +1,6 @@
 #!/usr/bin/env just --justfile
 
-default: lock install format lint test example
+default: lock install format lint test build_ocaml example run_ocaml
 
 lock:
     poetry lock --no-update
@@ -8,7 +8,7 @@ lock:
 install:
     poetry install
 
-format: ssort isort black
+format: ssort isort black fmt_ocaml
 
 lint: flake8 pyright
 
@@ -37,3 +37,12 @@ coverage:
 
 example:
     poetry run python -m wode run example.wode
+
+run_ocaml:
+    opam exec dune exec wode
+
+build_ocaml:
+    opam exec dune build
+
+fmt_ocaml:
+    opam exec dune fmt -- --diff-command=delta
