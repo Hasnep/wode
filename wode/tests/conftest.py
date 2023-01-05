@@ -13,6 +13,7 @@ from wode.errors import (
     UnterminatedFloatError,
     WodeError,
 )
+from wode.source import Source
 from wode.token_type import TokenType
 from wode.types import Bool, List, NamedTuple, Str, Type
 
@@ -39,7 +40,7 @@ class WodeTestCase:
         broken: Bool = False,
     ) -> None:
         self.test_case_id = test_case_id
-        self.source = dedent(source)
+        self.source = Source(None, dedent(source))
         self.expected_tokens = expected_tokens + [SimplifiedToken(TokenType.EOF, "")]
         self.expected_scanner_error_types = expected_scanner_error_types
         self.expected_s_expressions = expected_s_expressions
