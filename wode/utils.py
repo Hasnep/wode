@@ -19,7 +19,7 @@ def is_whitespace(c: Str) -> Bool:
 def safe_slice(
     iterator: List[T],
     *,
-    begin: Int,
+    start: Int,
     length: Optional[Int] = None,
     end: Optional[Int] = None,
 ) -> List[T]:
@@ -28,9 +28,9 @@ def safe_slice(
         case (None, None):
             raise ValueError("One of `length` or `end` must be specified.")
         case (None, end):
-            return [iterator[i] for i in range(begin, end)]  # type: ignore
+            return [iterator[i] for i in range(start, end)]  # type: ignore
         case (length, None):
-            return [iterator[i] for i in range(begin, begin + length)]  # type: ignore
+            return [iterator[i] for i in range(start, start + length)]  # type: ignore
         case (length, end):
             raise ValueError("One of `length` or `end` must be specified.")
 
@@ -38,12 +38,12 @@ def safe_slice(
 def safe_substring(
     s: Str,
     *,
-    begin: Int,
+    start: Int,
     length: Optional[Int] = None,
     end: Optional[Int] = None,
 ) -> Str:
     """Get a substring and raise an IndexError if you try to access an out of bounds index."""
-    return "".join(safe_slice(List(s), begin=begin, length=length, end=end))
+    return "".join(safe_slice(List(s), start=start, length=length, end=end))
 
 
 class UnreachableError(Exception):

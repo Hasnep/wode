@@ -23,18 +23,18 @@ def test_is_whitespace():
 
 
 def test_safe_slice():
-    assert safe_slice(["a", "b", "c"], begin=1, end=2) == ["b"]
-    assert safe_slice(["a", "b", "c"], begin=1, length=1) == ["b"]
+    assert safe_slice(["a", "b", "c"], start=1, end=2) == ["b"]
+    assert safe_slice(["a", "b", "c"], start=1, length=1) == ["b"]
     with pytest.raises(IndexError):
-        safe_slice(["a", "b", "c"], begin=2, end=10)
+        safe_slice(["a", "b", "c"], start=2, end=10)
     with pytest.raises(IndexError):
-        safe_slice(["a", "b", "c"], begin=2, length=10)
+        safe_slice(["a", "b", "c"], start=2, length=10)
     with pytest.raises(ValueError):
-        safe_slice(["a", "b", "c"], begin=2)
+        safe_slice(["a", "b", "c"], start=2)
     with pytest.raises(ValueError):
-        safe_slice(["a", "b", "c"], begin=2, length=1, end=3)
+        safe_slice(["a", "b", "c"], start=2, length=1, end=3)
 
 
 def test_safe_substring():
-    assert safe_substring("abc", begin=1, end=2) == "b"
-    assert safe_substring("abc", begin=1, length=1) == "b"
+    assert safe_substring("abc", start=1, end=2) == "b"
+    assert safe_substring("abc", start=1, length=1) == "b"
