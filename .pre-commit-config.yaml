@@ -22,7 +22,7 @@ repos:
         id: check-added-large-files
 
   # Ocaml
-  - repo: https://github.com/arenadotio/pre-commit-ocamlformat
+  - repo: https://github.com/savonet/pre-commit-ocamlformat
     rev: master
     hooks:
       - name: Format OCaml files
