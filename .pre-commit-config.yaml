@@ -21,6 +21,13 @@ repos:
       - name: Don't allow adding large files
         id: check-added-large-files
 
+  # Ocaml
+  - repo: https://github.com/arenadotio/pre-commit-ocamlformat
+    rev: master
+    hooks:
+      - name: Format OCaml files
+        id: ocamlformat
+
   # Python
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
