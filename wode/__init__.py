@@ -1,8 +1,6 @@
 import importlib.metadata
 from pathlib import Path
 
-import typer
-
 from wode.ast_to_s_expression import convert_to_s_expression
 from wode.parser import ParserState, parse_all
 from wode.scanner import scan_all_tokens
@@ -11,19 +9,14 @@ from wode.source import Source
 __version__ = importlib.metadata.version("wode")
 
 
-cli = typer.Typer(add_completion=False)
-
-
-@cli.command("version")
 def show_version():
     print(__version__)
 
 
-@cli.command("run")
-def main(source_file_path: Path = typer.Argument(None, dir_okay=False)):
+def main(source_file_path: Path | str):
     # Read the source code from the specified file
     with open(source_file_path, "r") as f:
-        source = Source(source_file_path, f.read())
+        source = Source(Path(source_file_path), f.read())
 
     # Scan the source code into tokens
     tokens, scanner_errors = scan_all_tokens(source)

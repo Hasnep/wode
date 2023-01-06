@@ -15,9 +15,8 @@
 
 (package
  (name wode)
- (synopsis "A library for useful number functions")
- (description "This library provides useful number functions")
+ (synopsis "Wodeee synopsis")
+ (description "Wodeeeeeeee description")
  (depends
-  (alcotest :with-test)
   (pyml
    (= 20220905))))
