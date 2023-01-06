@@ -21,7 +21,7 @@ repos:
       - name: Don't allow adding large files
         id: check-added-large-files
 
-  # Ocaml
+  # OCaml
   - repo: https://github.com/savonet/pre-commit-ocamlformat
     rev: master
     hooks:
