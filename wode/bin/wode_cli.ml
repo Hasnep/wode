@@ -1,6 +1,6 @@
 (* let cp file = print_endline (Printf.sprintf "Revolt! %s" file) *)
 
-let wode_main file = ignore (Wode.main [| Py.String.of_string file |])
+let wode_main source_file_path = ignore (Wode.main source_file_path)
 let argument_file = Cmdliner.Arg.(value & pos 0 file "" & info [])
 
 let cmd =

@@ -1,3 +1,5 @@
+import json
+
 from wode.ast import (
     BinaryExpression,
     Expression,
@@ -50,3 +52,7 @@ def convert_to_s_expression(expression: Expression) -> SExpression:
             ]
         case _:  # pragma: no cover
             raise UnreachableError(f"Unknown expression type `{type(expression)}`.")
+
+
+def stringify_s_expression(s_expression: SExpression) -> Str:
+    return json.dumps(s_expression)
