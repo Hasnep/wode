@@ -1,11 +1,8 @@
 let () = Py.initialize ()
-let wode_module = Py.import "wode"
 let wode_source_module = Py.import "wode.source"
 let wode_scanner_module = Py.import "wode.scanner"
 let wode_parser_module = Py.import "wode.parser"
 let wode_ast_to_s_expression_module = Py.import "wode.ast_to_s_expression"
-
-(* let main = Py.Module.get_function wode_module "main" *)
 let rec sum = function [] -> 0 | x :: xs -> x + sum xs
 
 let read_whole_file filename =
