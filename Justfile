@@ -47,4 +47,4 @@ dune_test:
     opam exec dune test
 
 example:
-    opam exec dune exec wode
+    opam exec dune exec wode -- ./example.wode
