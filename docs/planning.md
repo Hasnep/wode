@@ -3,10 +3,10 @@
 > All the Wode syntax in this is just temporary, I'll think more carefully about the syntax once I've implemented enough of the language to try using it.
 
 - Wode will be transpiled to Go.
-  - Go is designed to avoid some problems of C++, but it does it in a way that limits the expressiveness of the language.
-  - It doesn't seem to have a very good way to plug into its compiler and give it a Go AST, so it needs to be given raw Go syntax.
-  - This transpilation should allow easy interop with Go, at the very least calling Go functions in some way, and maybe automatically creating bindings for Go libraries.
-    - In theory Wode libraries could be transpiled and imported in Go programs, but they wouldn't be very useable because of all the hacky ways Wode's features will be implemented.
+  - Go was designed by Google to avoid the problems they saw with C++, but some of the ways it solves those problems limit the expressiveness of the language.
+  - Go doesn't seem to have any way to plug into its compiler (_e.g._, there's no way to give it a Go AST to compile, so it needs to be given raw Go syntax).
+  - Transpiling to Go should allow easy interop with existing Go code, at the very least calling Go functions in some way, and maybe automatically creating bindings for Go libraries.
+  - In theory Wode libraries could be transpiled and imported in Go programs, but they wouldn't be very useable because of all the hacky ways Wode's features will be implemented on top of Go.
 - The transpiled code will not be idiomatic Go or even very readable.
   - Because Go doesn't have a lot of the features I want in Wode, they will have to be implemented in hacky ways.
   - For example, trying to create something like an algebraic type in Go makes an un-maintanable mess (more than writing Go normally does), but as long as the transpiler produces code that does the right thing, we don't need to worry about the actual Go code.
