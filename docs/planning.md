@@ -2,6 +2,11 @@
 
 > All the Wode syntax in this is just temporary, I'll think more carefully about the syntax once I've implemented enough of the language to try using it.
 
+- The Wode transpiler will be written in OCaml.
+  - OCaml's "killer app" could be implementing language tooling, so I think it's a good choice for the Wode transpiler.
+  - The initial scanner and parser are currently written in Python, but it's a very functional style of Python, so it shouldn't be too hard to translate it to OCaml.
+  - I have a pretty robust test-suite for the existing code, so I can make sure I replicate the behaviour in OCaml.
+  - It's pretty easy to call Python from OCaml, so I can swap out the Python implementation piece by piece until it's all rewritten.
 - Wode will be transpiled to Go.
   - Go was designed by Google to avoid the problems they saw with C++, but some of the ways it solves those problems limit the expressiveness of the language.
   - Go doesn't seem to have any way to plug into its compiler (_e.g._, there's no way to give it a Go AST to compile, so it needs to be given raw Go syntax).
